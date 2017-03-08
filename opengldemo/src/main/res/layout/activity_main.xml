@@ -13,7 +13,7 @@
         app:tabTextColor="@color/black"
         android:layout_width="match_parent"
         android:layout_height="48dp"/>
-    <android.support.v4.view.ViewPager
+    <com.suhang.opengldemo.widget.NoScrollViewPager
         android:id="@+id/vp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

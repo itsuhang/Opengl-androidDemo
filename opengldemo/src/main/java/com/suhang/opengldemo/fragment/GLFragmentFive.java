@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.suhang.opengldemo.R;
+import com.suhang.opengldemo.render.OpenGlRenderFive;
 import com.suhang.opengldemo.render.OpenGlRenderOne;
 import com.suhang.opengldemo.widget.MyGLSurfaceView;
 
@@ -26,7 +27,7 @@ public class GLFragmentFive extends Fragment {
 	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_gl, container, false);
 		MyGLSurfaceView glsv = (MyGLSurfaceView) view.findViewById(R.id.glsv);
-		glsv.setRenderer(new OpenGlRenderOne(getContext()));
+		glsv.setRenderer(new OpenGlRenderFive(getContext()));
 		return view;
 	}
 }

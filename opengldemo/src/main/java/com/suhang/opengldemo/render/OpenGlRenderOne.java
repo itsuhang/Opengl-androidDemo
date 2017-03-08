@@ -45,10 +45,10 @@ public class OpenGlRenderOne implements GLSurfaceView.Renderer {
 	}
 
 	private void getLocations() {
-		float time = 1.0f*SystemClock.uptimeMillis()/1000;
-		float v = (float) (Math.sin(time) / 2 + 0.5);
+//		float time = 1.0f*SystemClock.uptimeMillis()/1000;
+//		float v = (float) (Math.sin(time) / 2 + 0.5);
 		int fragcolor = GLES30.glGetUniformLocation(mProgram, "fragcolor");
-		GLES30.glUniform4f(fragcolor, 0.0f, v, 0.0f, 1.0f);
+		GLES30.glUniform4f(fragcolor, 0.0f, 1.0f, 0.0f, 1.0f);
 	}
 
 	private void createData() {
