@@ -1,11 +1,10 @@
 package com.suhang.opengldemo.render;
 
 import android.content.Context;
-import android.opengl.GLES31;
+import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.os.SystemClock;
 
-import com.suhang.opengldemo.utils.LogUtil;
 import com.suhang.opengldemo.utils.ShaderUtil;
 
 import java.nio.ByteBuffer;
@@ -37,7 +36,7 @@ public class OpenGlRenderOne implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Set the background color to black ( rgba ).
-		GLES31.glClearColor(0.0f, 0.0f, 0.0f, 1f);  // OpenGL docs.
+		GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1f);  // OpenGL docs.
 		init();
 		createData();
 		getLocations();
@@ -48,8 +47,8 @@ public class OpenGlRenderOne implements GLSurfaceView.Renderer {
 	private void getLocations() {
 		float time = 1.0f*SystemClock.uptimeMillis()/1000;
 		float v = (float) (Math.sin(time) / 2 + 0.5);
-		int fragcolor = GLES31.glGetUniformLocation(mProgram, "fragcolor");
-		GLES31.glUniform4f(fragcolor, 0.0f, v, 0.0f, 1.0f);
+		int fragcolor = GLES30.glGetUniformLocation(mProgram, "fragcolor");
+		GLES30.glUniform4f(fragcolor, 0.0f, v, 0.0f, 1.0f);
 	}
 
 	private void createData() {
@@ -72,36 +71,28 @@ public class OpenGlRenderOne implements GLSurfaceView.Renderer {
 	}
 
 	private void init() {
-		mProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, "vertex_shader", GLES31.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, "fragment_shader", GLES31.GL_FRAGMENT_SHADER));
-		GLES31.glUseProgram(mProgram);
+		mProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, "vertex_shader", GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, "fragment_shader", GLES30.GL_FRAGMENT_SHADER));
+		GLES30.glUseProgram(mProgram);
 	}
 
 	private void bindData() {
 		mVertexData.position(0);
-		GLES31.glVertexAttribPointer(0, VERTEX_COUNT, GLES31.GL_FLOAT, false, mVertex.length, mVertexData);
-		GLES31.glEnableVertexAttribArray(0);
+		GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, mVertex.length, mVertexData);
+		GLES30.glEnableVertexAttribArray(0);
 	}
 
 	@Override
 	public void onSurfaceChanged(GL10 gl, int width, int height) {
 		// Sets the current view port to the new size.
-		GLES31.glViewport(0, 0, width, height);// OpenGL docs.
+		GLES30.glViewport(0, 0, width, height);// OpenGL docs.
 	}
 
 	int i = 0;
 
 	@Override
 	public void onDrawFrame(GL10 gl) {
-//		if (i > 10) {
-			getLocations();
-//			i = 0;
-//		}
-//		i++;
-		// Clears the screen and depth buffer.
-		gl.glClear(GL10.GL_COLOR_BUFFER_BIT);  // OpenGL docs.
-		gl.glLoadIdentity();
-		gl.glTranslatef(0, 0, -4);
-		GLES31.glLineWidth(10);
-		GLES31.glDrawElements(GLES31.GL_TRIANGLES, 6, GLES31.GL_UNSIGNED_SHORT, mIndicesData);
+		gl.glClear(GLES30.GL_COLOR_BUFFER_BIT);  // OpenGL docs.
+		GLES30.glLineWidth(10);
+		GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_SHORT, mIndicesData);
 	}
 }

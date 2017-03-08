@@ -2,7 +2,7 @@ package com.suhang.opengldemo.render;
 
 import android.content.Context;
 import android.opengl.GLES20;
-import android.opengl.GLES31;
+import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 
 import com.suhang.opengldemo.R;
@@ -46,15 +46,15 @@ public class OpenGlRenderThree implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Set the background color to black ( rgba ).
-		GLES31.glClearColor(0.0f, 0.0f, 0.0f, 1f);  // OpenGL docs.
+		GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1f);  // OpenGL docs.
 	}
 
 	private void getLocations() {
 //		float time = 1.0f*SystemClock.uptimeMillis()/1000;
 //		float v = (float) (Math.sin(time) / 2 + 0.5);
 //		LogUtil.i("啊啊啊"+Math.sin(time));
-//		int fragcolor = GLES31.glGetUniformLocation(mProgram, "fragcolor");
-//		GLES31.glUniform4f(fragcolor, 0.0f, v, 0.0f, 1.0f);
+//		int fragcolor = GLES30.glGetUniformLocation(mProgram, "fragcolor");
+//		GLES30.glUniform4f(fragcolor, 0.0f, v, 0.0f, 1.0f);
 	}
 
 	private void createData() {
@@ -79,28 +79,28 @@ public class OpenGlRenderThree implements GLSurfaceView.Renderer {
 	}
 
 	private void init() {
-		mProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, "vertex_shader_three", GLES31.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, "fragment_shader_three", GLES31.GL_FRAGMENT_SHADER));
-		GLES31.glUseProgram(mProgram);
+		mProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, "vertex_shader_three", GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, "fragment_shader_three", GLES30.GL_FRAGMENT_SHADER));
+		GLES30.glUseProgram(mProgram);
 	}
 
 	private void bindData() {
 		mVertexData.position(0);
-		GLES31.glVertexAttribPointer(0, VERTEX_COUNT, GLES31.GL_FLOAT, false, STRIDE, mVertexData);
-		GLES31.glEnableVertexAttribArray(0);
+		GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIDE, mVertexData);
+		GLES30.glEnableVertexAttribArray(0);
 		mVertexData.position(3);
-		GLES31.glVertexAttribPointer(1, VERTEX_COLOR_COUNT, GLES31.GL_FLOAT, false, STRIDE, mVertexData);
-		GLES31.glEnableVertexAttribArray(1);
+		GLES30.glVertexAttribPointer(1, VERTEX_COLOR_COUNT, GLES30.GL_FLOAT, false, STRIDE, mVertexData);
+		GLES30.glEnableVertexAttribArray(1);
 		mVertexData.position(6);
-		GLES31.glVertexAttribPointer(2, VERTEX_TEXTURE_COUNT, GLES31.GL_FLOAT, false, STRIDE, mVertexData);
-		GLES31.glEnableVertexAttribArray(2);
+		GLES30.glVertexAttribPointer(2, VERTEX_TEXTURE_COUNT, GLES30.GL_FLOAT, false, STRIDE, mVertexData);
+		GLES30.glEnableVertexAttribArray(2);
 
 
-		GLES31.glActiveTexture(GLES31.GL_TEXTURE0);
-		GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, mTexture);
-		GLES31.glUniform1i(GLES31.glGetUniformLocation(mProgram,"outTexture"),0);
-		GLES31.glActiveTexture(GLES31.GL_TEXTURE1);
-		GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, mTexture1);
-		GLES31.glUniform1i(GLES31.glGetUniformLocation(mProgram,"outTexture1"),1);
+		GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
+		GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTexture);
+		GLES30.glUniform1i(GLES30.glGetUniformLocation(mProgram,"outTexture"),0);
+		GLES30.glActiveTexture(GLES30.GL_TEXTURE1);
+		GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTexture1);
+		GLES30.glUniform1i(GLES30.glGetUniformLocation(mProgram,"outTexture1"),1);
 
 	}
 
@@ -109,7 +109,7 @@ public class OpenGlRenderThree implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceChanged(GL10 gl, int width, int height) {
 		// Sets the current view port to the new size.
-		GLES31.glViewport(0, 0, width, height);// OpenGL docs.
+		GLES30.glViewport(0, 0, width, height);// OpenGL docs.
 		factor = 1.0f * width / height;
 		init();
 		createData();
@@ -123,7 +123,7 @@ public class OpenGlRenderThree implements GLSurfaceView.Renderer {
 		gl.glClear(GL10.GL_COLOR_BUFFER_BIT);  // OpenGL docs.
 //		gl.glLoadIdentity();
 //		gl.glTranslatef(0, 0, -4);
-		GLES31.glDrawElements(GLES31.GL_TRIANGLES,6,GLES31.GL_UNSIGNED_INT,mIndicesData);
-//		GLES31.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+		GLES30.glDrawElements(GLES30.GL_TRIANGLES,6,GLES30.GL_UNSIGNED_INT,mIndicesData);
+//		GLES30.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
 	}
 }

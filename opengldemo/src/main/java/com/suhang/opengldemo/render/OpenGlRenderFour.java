@@ -1,7 +1,7 @@
 package com.suhang.opengldemo.render;
 
 import android.content.Context;
-import android.opengl.GLES31;
+import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -38,8 +39,6 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 	private IntBuffer mIndicesData;
 	private int mProgram;
 	private int mTexture;
-	private int mTexture1;
-	private float[] mMatrix = new float[16];
 	private float[] mProjectionMatrix = new float[16];
 	private float[] mViewMatrix = new float[16];
 	private float[] mModelMatrix = new float[16];
@@ -47,7 +46,6 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 	private int mView;
 	private int mProjection;
 	private int mOutTexture;
-	private int mOutTexture1;
 
 	public OpenGlRenderFour(Context context) {
 		mContext = context;
@@ -57,16 +55,15 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Set the background color to black ( rgba ).
-		GLES31.glClearColor(0.0f, 0.0f, 0.0f, 1f);  // OpenGL docs.
-//        GLES31.glEnable(GLES31.GL_DEPTH_TEST);
+		GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1f);  // OpenGL docs.
+//        GLES30.glEnable(GLES30.GL_DEPTH_TEST);
 	}
 
 	private void getLocations() {
-		mOutTexture = GLES31.glGetUniformLocation(mProgram, "outTexture");
-		mOutTexture1 = GLES31.glGetUniformLocation(mProgram, "outTexture1");
-		mModel = GLES31.glGetUniformLocation(mProgram, "model");
-		mView = GLES31.glGetUniformLocation(mProgram, "view");
-		mProjection = GLES31.glGetUniformLocation(mProgram, "projection");
+		mOutTexture = GLES30.glGetUniformLocation(mProgram, "outTexture");
+		mModel = GLES30.glGetUniformLocation(mProgram, "model");
+		mView = GLES30.glGetUniformLocation(mProgram, "view");
+		mProjection = GLES30.glGetUniformLocation(mProgram, "projection");
 	}
 
 	private void createData() {
@@ -86,13 +83,12 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 		mIndicesData = ByteBuffer.allocateDirect(mIndices.length * 4).order(ByteOrder.nativeOrder()).asIntBuffer();
 		mIndicesData.put(mIndices);
 		mIndicesData.position(0);
-		mTexture = TextureUtil.loadTexture(mContext, R.mipmap.ic_launcher_round);
-		mTexture1 = TextureUtil.loadTexture(mContext, R.mipmap.huanpeng);
+		mTexture = TextureUtil.loadTexture(mContext, R.mipmap.huanpeng);
 	}
 
 	private void init() {
-		mProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_four, GLES31.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_four, GLES31.GL_FRAGMENT_SHADER));
-		GLES31.glUseProgram(mProgram);
+		mProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_four, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_four, GLES30.GL_FRAGMENT_SHADER));
+		GLES30.glUseProgram(mProgram);
 	}
 
 
@@ -114,21 +110,18 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 
 	private void bindData() {
 		mVertexData.position(0);
-		GLES31.glVertexAttribPointer(0, VERTEX_COUNT, GLES31.GL_FLOAT, false, STRIDE, mVertexData);
-		GLES31.glEnableVertexAttribArray(0);
+		GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIDE, mVertexData);
+		GLES30.glEnableVertexAttribArray(0);
 		mVertexData.position(3);
-		GLES31.glVertexAttribPointer(1, VERTEX_COLOR_COUNT, GLES31.GL_FLOAT, false, STRIDE, mVertexData);
-		GLES31.glEnableVertexAttribArray(1);
+		GLES30.glVertexAttribPointer(1, VERTEX_COLOR_COUNT, GLES30.GL_FLOAT, false, STRIDE, mVertexData);
+		GLES30.glEnableVertexAttribArray(1);
 		mVertexData.position(6);
-		GLES31.glVertexAttribPointer(2, VERTEX_TEXTURE_COUNT, GLES31.GL_FLOAT, false, STRIDE, mVertexData);
-		GLES31.glEnableVertexAttribArray(2);
+		GLES30.glVertexAttribPointer(2, VERTEX_TEXTURE_COUNT, GLES30.GL_FLOAT, false, STRIDE, mVertexData);
+		GLES30.glEnableVertexAttribArray(2);
 
-		GLES31.glActiveTexture(GLES31.GL_TEXTURE0);
-		GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, mTexture);
-		GLES31.glUniform1i(mOutTexture, 0);
-		GLES31.glActiveTexture(GLES31.GL_TEXTURE1);
-		GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, mTexture1);
-		GLES31.glUniform1i(mOutTexture1, 1);
+		GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
+		GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTexture);
+		GLES30.glUniform1i(mOutTexture, 0);
 	}
 
 //	private float factor;
@@ -136,7 +129,7 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceChanged(GL10 gl, int width, int height) {
 		// Sets the current view port to the new size.
-		GLES31.glViewport(0, 0, width, height);// OpenGL docs.
+		GLES30.glViewport(0, 0, width, height);// OpenGL docs.
 //		factor = 1.0f * width / height;
 		init();
 		createData();
@@ -154,9 +147,9 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 	private void bindMatrix() {
         float angle = (float)(SystemClock.uptimeMillis() % TIME) / TIME * 360;
         Matrix.rotateM(mModelMatrix, 0,angle, 0.0f, 1.0f,0.5f);
-		GLES31.glUniformMatrix4fv(mModel, 1, false, mModelMatrix, 0);
-		GLES31.glUniformMatrix4fv(mView, 1, false, mViewMatrix, 0);
-		GLES31.glUniformMatrix4fv(mProjection, 1, false, mProjectionMatrix, 0);
+		GLES30.glUniformMatrix4fv(mModel, 1, false, mModelMatrix, 0);
+		GLES30.glUniformMatrix4fv(mView, 1, false, mViewMatrix, 0);
+		GLES30.glUniformMatrix4fv(mProjection, 1, false, mProjectionMatrix, 0);
 	}
 
 	@Override
@@ -164,6 +157,6 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 		gl.glClear(GL_COLOR_BUFFER_BIT);  // OpenGL docs.0
 		Matrix.setIdentityM(mModelMatrix, 0);
 		bindMatrix();
-		GLES31.glDrawElements(GLES31.GL_TRIANGLES, 6, GLES31.GL_UNSIGNED_INT, mIndicesData);
+		GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_INT, mIndicesData);
 	}
 }

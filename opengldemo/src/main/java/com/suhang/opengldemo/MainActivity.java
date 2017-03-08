@@ -1,5 +1,8 @@
 package com.suhang.opengldemo;
 
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.pm.ConfigurationInfo;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -12,6 +15,7 @@ import com.suhang.opengldemo.fragment.GLFragmentFour;
 import com.suhang.opengldemo.fragment.GLFragmentOne;
 import com.suhang.opengldemo.fragment.GLFragmentThree;
 import com.suhang.opengldemo.fragment.GLFragmentTwo;
+import com.suhang.opengldemo.utils.LogUtil;
 
 import java.util.ArrayList;
 
@@ -29,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
 		mVp = (ViewPager) findViewById(R.id.vp);
 		initData();
 		init();
+		ActivityManager am =(ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		ConfigurationInfo info = am.getDeviceConfigurationInfo();
+		LogUtil.i("啊啊啊"+info.getGlEsVersion());
 
 	}
 
