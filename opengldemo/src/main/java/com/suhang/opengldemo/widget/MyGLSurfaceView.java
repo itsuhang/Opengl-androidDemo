@@ -60,19 +60,21 @@ public class MyGLSurfaceView extends GLSurfaceView {
 				break;
 			case MotionEvent.ACTION_MOVE:
 				float dx = event.getX() - lastX;
-				float dy = event.getY() - lastY;
+				float dy = lastY - event.getY();
 				lastX = event.getX();
 				lastY = event.getY();
 				dx *= sensitivity;
 				dy *= sensitivity;
 				yaw += dx;
 				pitch += dy;
-				if (pitch > 89.0f) {
+				if (pitch >= 89.0f) {
 					pitch = 89.0f;
 				}
-				if (pitch < -89.0f) {
+				if (pitch <= -89.0f) {
 					pitch = -89.0f;
 				}
+				LogUtil.i("啊啊啊"+yaw +"  "+ pitch);
+				LogUtil.i("啊啊啊"+VectorUtil.angleTransform(yaw)+"    "+VectorUtil.angleTransform(pitch));
 				float[] front = {(float) (Math.cos(VectorUtil.angleTransform(yaw)) * Math.cos(VectorUtil.angleTransform(pitch))), (float) Math.cos(VectorUtil.angleTransform(pitch)), (float) (Math.cos(VectorUtil.angleTransform(yaw)) * Math.sin(VectorUtil.angleTransform(pitch)))};
 				mRenderFive.move(VectorUtil.normalize(front, 1));
 				break;
