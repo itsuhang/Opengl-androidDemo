@@ -60,6 +60,7 @@ public class VectorUtil {
 		float y = a[1];
 		float z = a[2];
 		float sqrt = (float) Math.sqrt(x * x + y * y + z * z);
+//		LogUtil.i("啊啊啊sqrt"+sqrt);
 		if (sqrt == 0) {
 			b[0] = 0;
 			b[1] = 0;
