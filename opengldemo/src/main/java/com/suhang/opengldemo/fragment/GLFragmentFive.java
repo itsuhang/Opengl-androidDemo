@@ -32,17 +32,17 @@ public class GLFragmentFive extends Fragment {
 		MyGLSurfaceView glsv = (MyGLSurfaceView) view.findViewById(R.id.glsv);
 		glsv.setRenderer(new OpenGlRenderFive(getContext()));
 		ConstantButton left = (ConstantButton) view.findViewById(R.id.left);
-        ConstantlyButton left_rotate = (ConstantlyButton) view.findViewById(R.id.left_rotate);
+		ConstantButton left_rotate = (ConstantButton) view.findViewById(R.id.up);
         ConstantButton right = (ConstantButton) view.findViewById(R.id.right);
-        ConstantlyButton right_rotate = (ConstantlyButton) view.findViewById(R.id.right_rotate);
+		ConstantButton right_rotate = (ConstantButton) view.findViewById(R.id.down);
 		left.setVisibility(View.VISIBLE);
 		right.setVisibility(View.VISIBLE);
-//		left_rotate.setVisibility(View.VISIBLE);
-//		right_rotate.setVisibility(View.VISIBLE);
+		left_rotate.setVisibility(View.VISIBLE);
+		right_rotate.setVisibility(View.VISIBLE);
 		left.setOnConstantClickListener(glsv);
 		right.setOnConstantClickListener(glsv);
-//		left_rotate.setOnConstantlyClickListener(glsv);
-//		right_rotate.setOnConstantlyClickListener(glsv);
+		left_rotate.setOnConstantClickListener(glsv);
+		right_rotate.setOnConstantClickListener(glsv);
 		return view;
 	}
 }

@@ -108,6 +108,9 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
     }
 
 
+    float initScale = 0.1f;
+    int dir;
+    int lastDir;
 
     @Override
     public boolean onScale(ScaleGestureDetector detector) {
@@ -116,22 +119,31 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
         }
         float factor = detector.getScaleFactor();
         if (factor > 1.0f) {
-            mRenderFive.scale(1);
+            dir = 1;
+//            mRenderFive.scale(1);
+            initScale *= factor;
+            mRenderFive.scale(1,initScale);
+
         } else {
-            mRenderFive.scale(0);
+            dir = 0;
+            initScale *= (2 - factor);
+            mRenderFive.scale(0,initScale);
         }
+        if (dir != lastDir) {
+            initScale = 0.1f;
+        }
+        lastDir = dir;
         return true;
     }
 
     @Override
     public boolean onScaleBegin(ScaleGestureDetector detector) {
-        LogUtil.i("啊啊啊begin");
         return true;
     }
 
     @Override
     public void onScaleEnd(ScaleGestureDetector detector) {
-        LogUtil.i("啊啊啊end");
+        initScale = 0.1f;
     }
 
     @Override
@@ -140,9 +152,13 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
             return;
         }
         if (v.getId() == R.id.left) {
-            mRenderFive.moveScreen(isPress,true);
+            mRenderFive.moveScreen(isPress,OpenGlRenderFive.LEFT);
+        } else if(v.getId()==R.id.right){
+            mRenderFive.moveScreen(isPress,OpenGlRenderFive.RIGHT);
+        } else if (v.getId() == R.id.up) {
+            mRenderFive.moveScreen(isPress,OpenGlRenderFive.UP);
         } else {
-            mRenderFive.moveScreen(isPress,false);
+            mRenderFive.moveScreen(isPress,OpenGlRenderFive.DOWN);
         }
     }
 }

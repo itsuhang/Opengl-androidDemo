@@ -51,6 +51,7 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
     public static final int RIGHT = 2;
     public static final int UP = 3;
     public static final int DOWN = 4;
+    private float[] mSkyboxVertices;
 
     public OpenGlRenderFive(Context context) {
         mContext = context;
@@ -66,26 +67,26 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
 
     public void move(float[] a) {
         mPosition = a;
-        createViewMatrix();
+//        createViewMatrix();
     }
 
     private float scaleSpeed = 0.05f;
 
-    public void scale(int dir) {
+    public void scale(int dir,float speed) {
         if (dir > 0) {
-            mSee = VectorUtil.add(mSee, VectorUtil.multiply(mPosition, scaleSpeed));
+            mSee = VectorUtil.add(mSee, VectorUtil.multiply(mPosition, speed));
         } else {
-            mSee = VectorUtil.reduce(mSee, VectorUtil.multiply(mPosition, scaleSpeed));
+            mSee = VectorUtil.reduce(mSee, VectorUtil.multiply(mPosition, speed));
         }
-        createViewMatrix();
+//        createViewMatrix();
     }
 
     private boolean isPress;
-    private boolean isLeft;
+    private int direction;
 
-    public void moveScreen(boolean isPress, boolean isLeft) {
+    public void moveScreen(boolean isPress, int direction) {
         this.isPress = isPress;
-        this.isLeft = isLeft;
+        this.direction = direction;
     }
 
 
@@ -95,6 +96,8 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
         mView = GLES30.glGetUniformLocation(mProgram, "view");
         mProjection = GLES30.glGetUniformLocation(mProgram, "projection");
     }
+
+    private FloatBuffer mSkyBuffer;
 
     private void createData() {
         mVertex = new float[]{
@@ -141,6 +144,53 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
                 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
         };
 
+        // Positions
+        mSkyboxVertices = new float[]{
+                // Positions
+                -1.0f, 1.0f, -1.0f,
+                -1.0f, -1.0f, -1.0f,
+                1.0f, -1.0f, -1.0f,
+                1.0f, -1.0f, -1.0f,
+                1.0f, 1.0f, -1.0f,
+                -1.0f, 1.0f, -1.0f,
+
+                -1.0f, -1.0f, 1.0f,
+                -1.0f, -1.0f, -1.0f,
+                -1.0f, 1.0f, -1.0f,
+                -1.0f, 1.0f, -1.0f,
+                -1.0f, 1.0f, 1.0f,
+                -1.0f, -1.0f, 1.0f,
+
+                1.0f, -1.0f, -1.0f,
+                1.0f, -1.0f, 1.0f,
+                1.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, -1.0f,
+                1.0f, -1.0f, -1.0f,
+
+                -1.0f, -1.0f, 1.0f,
+                -1.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 1.0f,
+                -1.0f, -1.0f, 1.0f,
+
+                -1.0f, 1.0f, -1.0f,
+                1.0f, 1.0f, -1.0f,
+                1.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, 1.0f,
+                -1.0f, 1.0f, 1.0f,
+                -1.0f, 1.0f, -1.0f,
+
+                -1.0f, -1.0f, -1.0f,
+                -1.0f, -1.0f, 1.0f,
+                1.0f, -1.0f, -1.0f,
+                1.0f, -1.0f, -1.0f,
+                -1.0f, -1.0f, 1.0f,
+                1.0f, -1.0f, 1.0f
+        };
+
+
         mCube = new float[][]{
                 {0.0f, 0.0f, 0.0f},
                 {2.0f, 3.0f, -6.0f},
@@ -156,7 +206,9 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
 
         mVertexData = ByteBuffer.allocateDirect(mVertex.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
         mVertexData.put(mVertex);
-        mTexture = TextureUtil.loadTexture(mContext, R.mipmap.box5);
+        mSkyBuffer = ByteBuffer.allocateDirect(mSkyboxVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mSkyBuffer.put(mSkyboxVertices);
+        mTexture = TextureUtil.loadTextureCube(mContext, new int[]{R.mipmap.box0, R.mipmap.box1, R.mipmap.box2, R.mipmap.box3, R.mipmap.box4, R.mipmap.box5});
     }
 
 
@@ -191,8 +243,12 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
         GLES30.glVertexAttribPointer(2, VERTEX_TEXTURE_COUNT, GLES30.GL_FLOAT, false, STRIDE, mVertexData);
         GLES30.glEnableVertexAttribArray(2);
 
+        mSkyBuffer.position(0);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, 12, mSkyBuffer);
+        GLES30.glEnableVertexAttribArray(0);
+
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTexture);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_CUBE_MAP, mTexture);
         GLES30.glUniform1i(mOutTexture, 0);
     }
 
@@ -205,7 +261,7 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
         createData();
         getLocations();
         bindData();
-        createViewMatrix();
+//        createViewMatrix();
         createModelMatrix();
         createProjectionMatrix(width, height);
         bindMatrix();
@@ -214,13 +270,17 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
 
     private void bindMatrix() {
         if (isPress) {
-            if (isLeft) {
+            if (direction == LEFT) {
                 mSee = VectorUtil.add(mSee, VectorUtil.normalize(VectorUtil.multiply(VectorUtil.multiply(mPosition, mUp), scaleSpeed), scaleSpeed));
-            } else {
+            } else if (direction == RIGHT) {
                 mSee = VectorUtil.reduce(mSee, VectorUtil.normalize(VectorUtil.multiply(VectorUtil.multiply(mPosition, mUp), scaleSpeed), scaleSpeed));
+            } else if (direction == UP) {
+                mSee[1] += scaleSpeed;
+            } else {
+                mSee[1] -= scaleSpeed;
             }
-            createViewMatrix();
         }
+        createViewMatrix();
         GLES30.glUniformMatrix4fv(mProjection, 1, false, mProjectionMatrix, 0);
         GLES30.glUniformMatrix4fv(mView, 1, false, mViewMatrix, 0);
         Matrix.setIdentityM(mModelMatrix, 0);
@@ -231,6 +291,7 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
             Matrix.rotateM(mModelMatrix, 0, angle, 1.0f, 0.3f, 0.5f);
             GLES30.glUniformMatrix4fv(mModel, 1, false, mModelMatrix, 0);
             GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36);
+//            GLES30.glDrawElements(GLES30.GL_TRIANGLES,);
         }
     }
 
