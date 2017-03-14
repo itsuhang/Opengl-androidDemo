@@ -93,14 +93,12 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 
 
 	private void createProjectionMatrix(int width, int height) {
-//		Matrix.setIdentityM(mProjectionMatrix,0);
 		Matrix.perspectiveM(mProjectionMatrix, 0, 45.0f, 1.0f * width / height, 0.1f, 100.0f);
 	}
 
 	private void createViewMatrix() {
 		Matrix.setIdentityM(mViewMatrix,0);
 		Matrix.translateM(mViewMatrix, 0, 0.0f, 0.0f, -3.0f);
-//		Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 0f, 0, 0, 0, 0, 1, 1);
 	}
 
 	private void createModelMatrix() {

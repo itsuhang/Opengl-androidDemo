@@ -3,16 +3,14 @@ package com.suhang.opengldemo.widget;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.SurfaceHolder;
 import android.view.View;
 
 import com.suhang.opengldemo.R;
+import com.suhang.opengldemo.function.Camera;
 import com.suhang.opengldemo.render.OpenGlRenderFive;
-import com.suhang.opengldemo.utils.LogUtil;
-import com.suhang.opengldemo.utils.VectorUtil;
 
 /**
  * Created by 苏杭 on 2017/3/6 14:18.
@@ -49,17 +47,10 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         super.surfaceChanged(holder, format, w, h);
-        lastX = w / 2.0f;
-        lastY = h / 2.0f;
-        yaw = -90;
-        pitch = 0;
     }
 
     float lastX;
     float lastY;
-    float sensitivity = 0.05f;
-    float yaw = -90;
-    float pitch;
     private boolean isMorePoint;
 
     @Override
@@ -80,20 +71,9 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
                 if (!isMorePoint) {
                     float dx = lastX - event.getX();
                     float dy = event.getY() - lastY;
+                    mRenderFive.getCamera().touchMove(dx,dy);
                     lastX = event.getX();
                     lastY = event.getY();
-                    dx *= sensitivity;
-                    dy *= sensitivity;
-                    yaw += dx;
-                    pitch += dy;
-                    if (pitch >= 89.0f) {
-                        pitch = 89.0f;
-                    }
-                    if (pitch <= -89.0f) {
-                        pitch = -89.0f;
-                    }
-                    float[] front = {(float) (Math.cos(VectorUtil.angleTransform(yaw)) * Math.cos(VectorUtil.angleTransform(pitch))), (float) Math.sin(VectorUtil.angleTransform(pitch)), (float) (Math.cos(VectorUtil.angleTransform(pitch)) * Math.sin(VectorUtil.angleTransform(yaw)))};
-                    mRenderFive.move(VectorUtil.normalize(front, 1));
                     return true;
                 } else {
                     return false;
@@ -121,13 +101,11 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
         if (factor > 1.0f) {
             dir = 1;
 //            mRenderFive.scale(1);
-            initScale *= factor;
-            mRenderFive.scale(1,initScale);
+            mRenderFive.getCamera().moveCamera(Camera.FORWARD,mRenderFive.getDeltaTime()*factor);
 
         } else {
             dir = 0;
-            initScale *= (2 - factor);
-            mRenderFive.scale(0,initScale);
+            mRenderFive.getCamera().moveCamera(Camera.BACKWARD,mRenderFive.getDeltaTime()*(2-factor));
         }
         if (dir != lastDir) {
             initScale = 0.1f;
@@ -152,13 +130,9 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
             return;
         }
         if (v.getId() == R.id.left) {
-            mRenderFive.moveScreen(isPress,OpenGlRenderFive.LEFT);
+            mRenderFive.moveScreen(isPress, Camera.LEFT);
         } else if(v.getId()==R.id.right){
-            mRenderFive.moveScreen(isPress,OpenGlRenderFive.RIGHT);
-        } else if (v.getId() == R.id.up) {
-            mRenderFive.moveScreen(isPress,OpenGlRenderFive.UP);
-        } else {
-            mRenderFive.moveScreen(isPress,OpenGlRenderFive.DOWN);
+            mRenderFive.moveScreen(isPress,Camera.RIGHT);
         }
     }
 }

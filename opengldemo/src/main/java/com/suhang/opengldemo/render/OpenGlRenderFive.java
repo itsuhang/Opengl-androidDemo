@@ -7,6 +7,7 @@ import android.opengl.Matrix;
 import android.os.SystemClock;
 
 import com.suhang.opengldemo.R;
+import com.suhang.opengldemo.function.Camera;
 import com.suhang.opengldemo.utils.ShaderUtil;
 import com.suhang.opengldemo.utils.TextureUtil;
 import com.suhang.opengldemo.utils.VectorUtil;
@@ -27,18 +28,11 @@ import static android.opengl.GLES30.GL_DEPTH_BUFFER_BIT;
 
 public class OpenGlRenderFive implements GLSurfaceView.Renderer {
     public static final int VERTEX_COUNT = 3;
-    public static final int VERTEX_COLOR_COUNT = 0;
-    public static final int VERTEX_TEXTURE_COUNT = 2;
     public static final int FLOATBYTE = 4;
-    public static final int STRIDE = (VERTEX_COUNT + VERTEX_COLOR_COUNT + VERTEX_TEXTURE_COUNT) * FLOATBYTE;
 
     Context mContext;
-    private float[] mVertex;
-    private FloatBuffer mVertexData;
     private int mProgram;
     private int mTexture;
-    private float[] mProjectionMatrix = new float[16];
-    private float[] mViewMatrix = new float[16];
     private float[] mModelMatrix = new float[16];
     private int mModel;
     private int mView;
@@ -47,11 +41,8 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
     float deltaTime = 0.0f;
     float lastTime = 0.0f;
     private float[][] mCube;
-    public static final int LEFT = 1;
-    public static final int RIGHT = 2;
-    public static final int UP = 3;
-    public static final int DOWN = 4;
     private float[] mSkyboxVertices;
+    private Camera mCamera = new Camera(new float[]{0,0,5});
 
     public OpenGlRenderFive(Context context) {
         mContext = context;
@@ -60,25 +51,17 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        // Set the background color to black ( rgba ).
         GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1f);  // OpenGL docs.
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
     }
 
-    public void move(float[] a) {
-        mPosition = a;
-//        createViewMatrix();
+
+    public Camera getCamera() {
+        return mCamera;
     }
 
-    private float scaleSpeed = 0.05f;
-
-    public void scale(int dir,float speed) {
-        if (dir > 0) {
-            mSee = VectorUtil.add(mSee, VectorUtil.multiply(mPosition, speed));
-        } else {
-            mSee = VectorUtil.reduce(mSee, VectorUtil.multiply(mPosition, speed));
-        }
-//        createViewMatrix();
+    public float getDeltaTime() {
+        return deltaTime;
     }
 
     private boolean isPress;
@@ -100,51 +83,6 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
     private FloatBuffer mSkyBuffer;
 
     private void createData() {
-        mVertex = new float[]{
-                -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-                0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-                0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-                -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-                0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-                0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-                0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-                -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-
-                -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-                -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-                -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-                0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-                0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-                0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-                0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-                0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-                0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-                0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-                -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
-        };
-
-        // Positions
         mSkyboxVertices = new float[]{
                 // Positions
                 -1.0f, 1.0f, -1.0f,
@@ -203,48 +141,19 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
                 {1.5f, 0.2f, -1.5f},
                 {-1.3f, 1.0f, -1.5f}
         };
-
-        mVertexData = ByteBuffer.allocateDirect(mVertex.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mVertexData.put(mVertex);
         mSkyBuffer = ByteBuffer.allocateDirect(mSkyboxVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
         mSkyBuffer.put(mSkyboxVertices);
         mTexture = TextureUtil.loadTextureCube(mContext, new int[]{R.mipmap.box0, R.mipmap.box1, R.mipmap.box2, R.mipmap.box3, R.mipmap.box4, R.mipmap.box5});
     }
-
-
-    private float[] mSee = {0f, 0f, 5f};
-    private float[] mPosition = {0f, 0f, -1f};
-    private float[] mUp = {0f, 1f, 0f};
-
 
     private void init() {
         mProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_five, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_five, GLES30.GL_FRAGMENT_SHADER));
         GLES30.glUseProgram(mProgram);
     }
 
-
-    private void createProjectionMatrix(int width, int height) {
-        Matrix.perspectiveM(mProjectionMatrix, 0, 45.0f, 1.0f * width / height, 0.1f, 100.0f);
-    }
-
-    private void createViewMatrix() {
-        Matrix.setLookAtM(mViewMatrix, 0, mSee[0], mSee[1], mSee[2], mSee[0] + mPosition[0], mSee[1] + mPosition[1], mSee[2] + mPosition[2], mUp[0], mUp[1], mUp[2]);
-    }
-
-    private void createModelMatrix() {
-        Matrix.setIdentityM(mModelMatrix, 0);
-    }
-
     private void bindData() {
-        mVertexData.position(0);
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIDE, mVertexData);
-        GLES30.glEnableVertexAttribArray(0);
-        mVertexData.position(3);
-        GLES30.glVertexAttribPointer(2, VERTEX_TEXTURE_COUNT, GLES30.GL_FLOAT, false, STRIDE, mVertexData);
-        GLES30.glEnableVertexAttribArray(2);
-
         mSkyBuffer.position(0);
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, 12, mSkyBuffer);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, VERTEX_COUNT*FLOATBYTE, mSkyBuffer);
         GLES30.glEnableVertexAttribArray(0);
 
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
@@ -252,7 +161,6 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
         GLES30.glUniform1i(mOutTexture, 0);
     }
 
-//	private float factor;
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
@@ -261,28 +169,16 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
         createData();
         getLocations();
         bindData();
-//        createViewMatrix();
-        createModelMatrix();
-        createProjectionMatrix(width, height);
+        mCamera.onScreenChange(width, height);
         bindMatrix();
     }
 
 
     private void bindMatrix() {
         if (isPress) {
-            if (direction == LEFT) {
-                mSee = VectorUtil.add(mSee, VectorUtil.normalize(VectorUtil.multiply(VectorUtil.multiply(mPosition, mUp), scaleSpeed), scaleSpeed));
-            } else if (direction == RIGHT) {
-                mSee = VectorUtil.reduce(mSee, VectorUtil.normalize(VectorUtil.multiply(VectorUtil.multiply(mPosition, mUp), scaleSpeed), scaleSpeed));
-            } else if (direction == UP) {
-                mSee[1] += scaleSpeed;
-            } else {
-                mSee[1] -= scaleSpeed;
-            }
+            mCamera.moveCamera(direction, deltaTime);
         }
-        createViewMatrix();
-        GLES30.glUniformMatrix4fv(mProjection, 1, false, mProjectionMatrix, 0);
-        GLES30.glUniformMatrix4fv(mView, 1, false, mViewMatrix, 0);
+        mCamera.bindMatrix(mView, mProjection);
         Matrix.setIdentityM(mModelMatrix, 0);
         for (int i = 0; i < 10; i++) {
             float[] cubes = mCube[i];
@@ -291,7 +187,6 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
             Matrix.rotateM(mModelMatrix, 0, angle, 1.0f, 0.3f, 0.5f);
             GLES30.glUniformMatrix4fv(mModel, 1, false, mModelMatrix, 0);
             GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36);
-//            GLES30.glDrawElements(GLES30.GL_TRIANGLES,);
         }
     }
 
@@ -306,7 +201,6 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
         lastTime = currentTime;
         GLES30.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // OpenGL docs.0
-//        createViewMatrix();
         bindMatrix();
     }
 }
