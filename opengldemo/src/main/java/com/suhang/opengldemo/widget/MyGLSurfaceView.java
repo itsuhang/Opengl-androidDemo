@@ -45,7 +45,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 	float lastX;
 	float lastY;
 	float sensitivity = 0.05f;
-	float yaw = -90;
+	float yaw ;
 	float pitch;
 
 	@Override
@@ -73,8 +73,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 				if (pitch <= -89.0f) {
 					pitch = -89.0f;
 				}
-				LogUtil.i("啊啊啊"+yaw +"  "+ pitch);
-				LogUtil.i("啊啊啊"+VectorUtil.angleTransform(yaw)+"    "+VectorUtil.angleTransform(pitch));
+				LogUtil.i("啊啊啊" + (Math.cos(VectorUtil.angleTransform(yaw)) * Math.sin(VectorUtil.angleTransform(pitch))));
 				float[] front = {(float) (Math.cos(VectorUtil.angleTransform(yaw)) * Math.cos(VectorUtil.angleTransform(pitch))), (float) Math.cos(VectorUtil.angleTransform(pitch)), (float) (Math.cos(VectorUtil.angleTransform(yaw)) * Math.sin(VectorUtil.angleTransform(pitch)))};
 				mRenderFive.move(VectorUtil.normalize(front, 1));
 				break;

@@ -83,7 +83,7 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
 //		}
         mPosition = a;
 //        LogUtil.i("啊啊啊see" + mSee[0] + "  " + mSee[1] + "   " + mSee[2]);
-//        LogUtil.i("啊啊啊po" + mPosition[0] + "  " + mPosition[1] + "   " + mPosition[2]);
+        LogUtil.i("啊啊啊po" + mPosition[0] + "  " + mPosition[1] + "   " + mPosition[2]);
 //        LogUtil.i("啊啊啊up" + mUp[0] + "  " + mUp[1] + "   " + mUp[2]);
         createViewMatrix();
         bindMatrix();
@@ -117,7 +117,7 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
     }
 
 
-    private float[] mSee = {0f, 0f,  5f};
+    private float[] mSee = {0f, 0f,  3f};
     private float[] mPosition = {0f, 0f, -1f};
     private float[] mUp = {0f, 1f, 0f};
 
@@ -130,7 +130,7 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
 
     private void createProjectionMatrix(int width, int height) {
         Matrix.setIdentityM(mProjectionMatrix, 0);
-        Matrix.perspectiveM(mProjectionMatrix, 0, 45.0f, 1.0f * width / height, 0.1f, 100.0f);
+        Matrix.perspectiveM(mProjectionMatrix, 0, 45.0f, 1.0f * width / height, 0.11f, 100.0f);
     }
 
     private void createViewMatrix() {
@@ -191,8 +191,6 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
         lastTime = currentTime;
         GLES30.glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // OpenGL docs.0
-        Matrix.setIdentityM(mModelMatrix, 0);
-        createViewMatrix();
         bindMatrix();
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, mIndices.length, GLES30.GL_UNSIGNED_INT, mIndicesData);
     }
