@@ -1,7 +1,7 @@
 package com.suhang.opengldemo.utils;
 
 import android.content.Context;
-import android.opengl.GLES31;
+import android.opengl.GLES30;
 
 /**
  * Created by 苏杭 on 2017/3/3 9:55.
@@ -10,29 +10,29 @@ import android.opengl.GLES31;
 public class ShaderUtil {
 	public static int createShader(Context context,String fileName,int type) {
 		String string = FileUtils.readTextFromAssets(context, fileName);
-		int shader = GLES31.glCreateShader(type);
-		GLES31.glShaderSource(shader,string);
-		GLES31.glCompileShader(shader);
+		int shader = GLES30.glCreateShader(type);
+		GLES30.glShaderSource(shader,string);
+		GLES30.glCompileShader(shader);
 		int[] success = new int[1];
-		GLES31.glGetShaderiv(shader,GLES31.GL_COMPILE_STATUS,success,0);
+		GLES30.glGetShaderiv(shader,GLES30.GL_COMPILE_STATUS,success,0);
 		if (success[0] <= 0) {
-			String s = GLES31.glGetShaderInfoLog(shader);
-			GLES31.glDeleteShader(shader);
+			String s = GLES30.glGetShaderInfoLog(shader);
+			GLES30.glDeleteShader(shader);
 			LogUtil.i("啊啊啊"+s);
 		}
 		return shader;
 	}
 
 	public static int createProgram(int vertexShader, int fragShader) {
-		int program = GLES31.glCreateProgram();
-		GLES31.glAttachShader(program,vertexShader);
-		GLES31.glAttachShader(program,fragShader);
-		GLES31.glLinkProgram(program);
+		int program = GLES30.glCreateProgram();
+		GLES30.glAttachShader(program,vertexShader);
+		GLES30.glAttachShader(program,fragShader);
+		GLES30.glLinkProgram(program);
 		int[] success = new int[1];
-		GLES31.glGetProgramiv(program, GLES31.GL_LINK_STATUS, success, 0);
+		GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, success, 0);
 		if (success[0] <= 0) {
-			String s = GLES31.glGetProgramInfoLog(program);
-			GLES31.glDeleteProgram(program);
+			String s = GLES30.glGetProgramInfoLog(program);
+			GLES30.glDeleteProgram(program);
 			LogUtil.i("啊啊啊"+s);
 		}
 		return program;
@@ -40,14 +40,14 @@ public class ShaderUtil {
 
 	public static int createShader(Context context,int id,int type) {
 		String string = FileUtils.readTextFromRaw(context, id);
-		int shader = GLES31.glCreateShader(type);
-		GLES31.glShaderSource(shader,string);
-		GLES31.glCompileShader(shader);
+		int shader = GLES30.glCreateShader(type);
+		GLES30.glShaderSource(shader,string);
+		GLES30.glCompileShader(shader);
 		int[] success = new int[1];
-		GLES31.glGetShaderiv(shader,GLES31.GL_COMPILE_STATUS,success,0);
+		GLES30.glGetShaderiv(shader,GLES30.GL_COMPILE_STATUS,success,0);
 		if (success[0] <= 0) {
-			String s = GLES31.glGetShaderInfoLog(shader);
-			GLES31.glDeleteShader(shader);
+			String s = GLES30.glGetShaderInfoLog(shader);
+			GLES30.glDeleteShader(shader);
 			LogUtil.i("啊啊啊"+s);
 		}
 		return shader;
