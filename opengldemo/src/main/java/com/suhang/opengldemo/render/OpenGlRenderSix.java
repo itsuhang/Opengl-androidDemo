@@ -8,8 +8,8 @@ import android.os.SystemClock;
 
 import com.suhang.opengldemo.R;
 import com.suhang.opengldemo.function.Camera;
+import com.suhang.opengldemo.interfaces.CanTranform;
 import com.suhang.opengldemo.utils.ShaderUtil;
-import com.suhang.opengldemo.utils.TextureUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -25,23 +25,29 @@ import static android.opengl.GLES30.GL_DEPTH_BUFFER_BIT;
  * Created by 苏杭 on 2017/2/5 13:54.
  */
 
-public class OpenGlRenderSix implements GLSurfaceView.Renderer {
+public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
     public static final int VERTEX_COUNT = 3;
     public static final int FLOATBYTE = 4;
 
     Context mContext;
-    private int mProgram;
-    private int mTexture;
+    private int mObjectProgram;
+    private int mLightProgram;
+    //    private int mTexture;
     private float[] mModelMatrix = new float[16];
-    private int mModel;
-    private int mView;
-    private int mProjection;
-    private int mOutTexture;
+    private int mObjectModel;
+    private int mObjectView;
+    private int mObjectProjection;
+    private int mLightModel;
+    private int mLightView;
+    private int mLightProjection;
+    //    private int mOutTexture;
     float deltaTime = 0.0f;
     float lastTime = 0.0f;
-    private float[][] mCube;
-    private float[] mSkyboxVertices;
-    private Camera mCamera = new Camera(new float[]{0,0,5});
+    private float[] mVertices;
+    private Camera mCamera = new Camera(new float[]{0, 0, 5});
+    private int mObjectColor;
+    private int mLightColor;
+    private float[] lightPos = {1.2f, 1.0f, 1.5f};
 
     public OpenGlRenderSix(Context context) {
         mContext = context;
@@ -54,11 +60,12 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer {
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
     }
 
-
+    @Override
     public Camera getCamera() {
         return mCamera;
     }
 
+    @Override
     public float getDeltaTime() {
         return deltaTime;
     }
@@ -66,6 +73,7 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer {
     private boolean isPress;
     private int direction;
 
+    @Override
     public void moveScreen(boolean isPress, int direction) {
         this.isPress = isPress;
         this.direction = direction;
@@ -73,91 +81,82 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer {
 
 
     private void getLocations() {
-        mOutTexture = GLES30.glGetUniformLocation(mProgram, "outTexture");
-        mModel = GLES30.glGetUniformLocation(mProgram, "model");
-        mView = GLES30.glGetUniformLocation(mProgram, "view");
-        mProjection = GLES30.glGetUniformLocation(mProgram, "projection");
+//        mOutTexture = GLES30.glGetUniformLocation(mObjectProgram, "outTexture");
+        mObjectModel = GLES30.glGetUniformLocation(mObjectProgram, "model");
+        mObjectView = GLES30.glGetUniformLocation(mObjectProgram, "view");
+        mObjectProjection = GLES30.glGetUniformLocation(mObjectProgram, "projection");
+        mLightModel = GLES30.glGetUniformLocation(mLightProgram, "model");
+        mLightView = GLES30.glGetUniformLocation(mLightProgram, "view");
+        mLightProjection = GLES30.glGetUniformLocation(mLightProgram, "projection");
+
+
+        mObjectColor = GLES30.glGetUniformLocation(mObjectProgram, "objectColor");
+        mLightColor = GLES30.glGetUniformLocation(mObjectProgram, "lightColor");
     }
 
-    private FloatBuffer mSkyBuffer;
+    private FloatBuffer mVertexBuffer;
 
     private void createData() {
-        mSkyboxVertices = new float[]{
-                // Positions
-                -1.0f, 1.0f, -1.0f,
-                -1.0f, -1.0f, -1.0f,
-                1.0f, -1.0f, -1.0f,
-                1.0f, -1.0f, -1.0f,
-                1.0f, 1.0f, -1.0f,
-                -1.0f, 1.0f, -1.0f,
+        mVertices = new float[]{
+                -0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, 0.5f, -0.5f,
+                0.5f, 0.5f, -0.5f,
+                -0.5f, 0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,
 
-                -1.0f, -1.0f, 1.0f,
-                -1.0f, -1.0f, -1.0f,
-                -1.0f, 1.0f, -1.0f,
-                -1.0f, 1.0f, -1.0f,
-                -1.0f, 1.0f, 1.0f,
-                -1.0f, -1.0f, 1.0f,
+                -0.5f, -0.5f, 0.5f,
+                0.5f, -0.5f, 0.5f,
+                0.5f, 0.5f, 0.5f,
+                0.5f, 0.5f, 0.5f,
+                -0.5f, 0.5f, 0.5f,
+                -0.5f, -0.5f, 0.5f,
 
-                1.0f, -1.0f, -1.0f,
-                1.0f, -1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, -1.0f,
-                1.0f, -1.0f, -1.0f,
+                -0.5f, 0.5f, 0.5f,
+                -0.5f, 0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,
+                -0.5f, -0.5f, 0.5f,
+                -0.5f, 0.5f, 0.5f,
 
-                -1.0f, -1.0f, 1.0f,
-                -1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 1.0f,
-                -1.0f, -1.0f, 1.0f,
+                0.5f, 0.5f, 0.5f,
+                0.5f, 0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, 0.5f,
+                0.5f, 0.5f, 0.5f,
 
-                -1.0f, 1.0f, -1.0f,
-                1.0f, 1.0f, -1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                -1.0f, 1.0f, 1.0f,
-                -1.0f, 1.0f, -1.0f,
+                -0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, 0.5f,
+                0.5f, -0.5f, 0.5f,
+                -0.5f, -0.5f, 0.5f,
+                -0.5f, -0.5f, -0.5f,
 
-                -1.0f, -1.0f, -1.0f,
-                -1.0f, -1.0f, 1.0f,
-                1.0f, -1.0f, -1.0f,
-                1.0f, -1.0f, -1.0f,
-                -1.0f, -1.0f, 1.0f,
-                1.0f, -1.0f, 1.0f
+                -0.5f, 0.5f, -0.5f,
+                0.5f, 0.5f, -0.5f,
+                0.5f, 0.5f, 0.5f,
+                0.5f, 0.5f, 0.5f,
+                -0.5f, 0.5f, 0.5f,
+                -0.5f, 0.5f, -0.5f
         };
 
-
-        mCube = new float[][]{
-                {0.0f, 0.0f, 0.0f},
-                {2.0f, 3.0f, -6.0f},
-                {-1.5f, -2.2f, -1.5f},
-                {-1.8f, -2.0f, -4.3f},
-                {2.4f, -0.4f, -2.5f},
-                {-1.7f, 2.0f, -3.5f},
-                {1.3f, -1.0f, -2.5f},
-                {1.5f, 2.0f, -2.5f},
-                {1.5f, 0.2f, -1.5f},
-                {-1.3f, 1.0f, -1.5f}
-        };
-        mSkyBuffer = ByteBuffer.allocateDirect(mSkyboxVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mSkyBuffer.put(mSkyboxVertices);
-        mTexture = TextureUtil.loadTextureCube(mContext, new int[]{R.mipmap.box0, R.mipmap.box1, R.mipmap.box2, R.mipmap.box3, R.mipmap.box4, R.mipmap.box5});
+        mVertexBuffer = ByteBuffer.allocateDirect(mVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mVertexBuffer.put(mVertices);
     }
 
     private void init() {
-        mProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_five, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_five, GLES30.GL_FRAGMENT_SHADER));
-        GLES30.glUseProgram(mProgram);
+        mObjectProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_six, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_six, GLES30.GL_FRAGMENT_SHADER));
+        mLightProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_six_light, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_six_light, GLES30.GL_FRAGMENT_SHADER));
     }
 
     private void bindData() {
-        mSkyBuffer.position(0);
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, VERTEX_COUNT*FLOATBYTE, mSkyBuffer);
+        mVertexBuffer.position(0);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, VERTEX_COUNT * FLOATBYTE, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(0);
 
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_CUBE_MAP, mTexture);
-        GLES30.glUniform1i(mOutTexture, 0);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, VERTEX_COUNT * FLOATBYTE, mVertexBuffer);
+        GLES30.glEnableVertexAttribArray(0);
     }
 
 
@@ -174,19 +173,26 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer {
 
 
     private void bindMatrix() {
+        GLES30.glUseProgram(mObjectProgram);
+        GLES30.glUniform3f(mObjectColor, 1.0f, 0.5f, 0.31f);
+        GLES30.glUniform3f(mLightColor, 1.0f, 1.0f, 1.0f);
+        mCamera.bindMatrix(mObjectView, mObjectProjection);
+        Matrix.setIdentityM(mModelMatrix, 0);
+        GLES30.glUniformMatrix4fv(mObjectModel, 1, false, mModelMatrix, 0);
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36);
+
+
+
+        GLES30.glUseProgram(mLightProgram);
         if (isPress) {
             mCamera.moveCamera(direction, deltaTime);
         }
-        mCamera.bindMatrix(mView, mProjection);
+        mCamera.bindMatrix(mLightView, mLightProjection);
         Matrix.setIdentityM(mModelMatrix, 0);
-        for (int i = 0; i < 10; i++) {
-            float[] cubes = mCube[i];
-            Matrix.translateM(mModelMatrix, 0, cubes[0], cubes[1], cubes[2]);
-            float angle = 20.0f * i;
-            Matrix.rotateM(mModelMatrix, 0, angle, 1.0f, 0.3f, 0.5f);
-            GLES30.glUniformMatrix4fv(mModel, 1, false, mModelMatrix, 0);
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36);
-        }
+        Matrix.translateM(mModelMatrix, 0, lightPos[0], lightPos[1], lightPos[2]);
+        Matrix.scaleM(mModelMatrix, 0, 0.4f, 0.4f, 0.4f);
+        GLES30.glUniformMatrix4fv(mLightModel, 1, false, mModelMatrix, 0);
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36);
     }
 
     private float getCurrentTime() {
@@ -198,7 +204,7 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer {
         float currentTime = getCurrentTime();
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
-        GLES30.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        GLES30.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // OpenGL docs.0
         bindMatrix();
     }

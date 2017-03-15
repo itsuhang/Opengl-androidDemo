@@ -8,6 +8,7 @@ import android.os.SystemClock;
 
 import com.suhang.opengldemo.R;
 import com.suhang.opengldemo.function.Camera;
+import com.suhang.opengldemo.interfaces.CanTranform;
 import com.suhang.opengldemo.utils.ShaderUtil;
 import com.suhang.opengldemo.utils.TextureUtil;
 import com.suhang.opengldemo.utils.VectorUtil;
@@ -26,7 +27,7 @@ import static android.opengl.GLES30.GL_DEPTH_BUFFER_BIT;
  * Created by 苏杭 on 2017/2/5 13:54.
  */
 
-public class OpenGlRenderFive implements GLSurfaceView.Renderer {
+public class OpenGlRenderFive implements GLSurfaceView.Renderer ,CanTranform{
     public static final int VERTEX_COUNT = 3;
     public static final int FLOATBYTE = 4;
 
@@ -55,18 +56,18 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
     }
 
-
+    @Override
     public Camera getCamera() {
         return mCamera;
     }
-
+    @Override
     public float getDeltaTime() {
         return deltaTime;
     }
 
     private boolean isPress;
     private int direction;
-
+    @Override
     public void moveScreen(boolean isPress, int direction) {
         this.isPress = isPress;
         this.direction = direction;

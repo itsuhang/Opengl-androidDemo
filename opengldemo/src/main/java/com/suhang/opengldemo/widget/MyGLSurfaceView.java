@@ -10,6 +10,7 @@ import android.view.View;
 
 import com.suhang.opengldemo.R;
 import com.suhang.opengldemo.function.Camera;
+import com.suhang.opengldemo.interfaces.CanTranform;
 import com.suhang.opengldemo.render.OpenGlRenderFive;
 
 /**
@@ -17,7 +18,7 @@ import com.suhang.opengldemo.render.OpenGlRenderFive;
  */
 
 public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetector.OnScaleGestureListener, ConstantButton.OnConstantClickListener{
-    private OpenGlRenderFive mRenderFive;
+    private CanTranform mTranform;
     private Context mContext;
     private ScaleGestureDetector mScaleGestureDetector;
 
@@ -39,8 +40,8 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
     @Override
     public void setRenderer(Renderer renderer) {
         super.setRenderer(renderer);
-        if (renderer instanceof OpenGlRenderFive) {
-            mRenderFive = (OpenGlRenderFive) renderer;
+        if (renderer instanceof CanTranform) {
+            mTranform = (CanTranform) renderer;
         }
     }
 
@@ -55,7 +56,7 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mRenderFive == null) {
+        if (mTranform == null) {
             return false;
         }
         mScaleGestureDetector.onTouchEvent(event);
@@ -71,7 +72,7 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
                 if (!isMorePoint) {
                     float dx = lastX - event.getX();
                     float dy = event.getY() - lastY;
-                    mRenderFive.getCamera().touchMove(dx,dy);
+                    mTranform.getCamera().touchMove(dx,dy);
                     lastX = event.getX();
                     lastY = event.getY();
                     return true;
@@ -94,18 +95,18 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
 
     @Override
     public boolean onScale(ScaleGestureDetector detector) {
-        if (mRenderFive == null) {
+        if (mTranform == null) {
             return false;
         }
         float factor = detector.getScaleFactor();
         if (factor > 1.0f) {
             dir = 1;
-//            mRenderFive.scale(1);
-            mRenderFive.getCamera().moveCamera(Camera.FORWARD,mRenderFive.getDeltaTime()*factor);
+//            mTranform.scale(1);
+            mTranform.getCamera().moveCamera(Camera.FORWARD, mTranform.getDeltaTime()*factor);
 
         } else {
             dir = 0;
-            mRenderFive.getCamera().moveCamera(Camera.BACKWARD,mRenderFive.getDeltaTime()*(2-factor));
+            mTranform.getCamera().moveCamera(Camera.BACKWARD, mTranform.getDeltaTime()*(2-factor));
         }
         if (dir != lastDir) {
             initScale = 0.1f;
@@ -126,17 +127,17 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
 
     @Override
     public void onConstantClick(boolean isPress,View v) {
-        if (mRenderFive == null) {
+        if (mTranform == null) {
             return;
         }
         if (v.getId() == R.id.left) {
-            mRenderFive.moveScreen(isPress, Camera.LEFT);
+            mTranform.moveScreen(isPress, Camera.LEFT);
         } else if(v.getId()==R.id.right){
-            mRenderFive.moveScreen(isPress,Camera.RIGHT);
+            mTranform.moveScreen(isPress,Camera.RIGHT);
         } else if (v.getId() == R.id.up) {
-            mRenderFive.moveScreen(isPress,Camera.SCALE_BIG);
+            mTranform.moveScreen(isPress,Camera.SCALE_BIG);
         } else {
-            mRenderFive.moveScreen(isPress,Camera.SCALE_SMALL);
+            mTranform.moveScreen(isPress,Camera.SCALE_SMALL);
         }
     }
 }
