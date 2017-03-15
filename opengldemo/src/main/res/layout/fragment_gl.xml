@@ -30,7 +30,7 @@
             android:id="@+id/up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="上"
+            android:text="放大"
             android:layout_toEndOf="@+id/left"
             android:layout_alignParentBottom="true"
     />
@@ -40,7 +40,7 @@
             android:id="@+id/down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="下"
+            android:text="缩小"
             android:layout_alignParentBottom="true"
     />
 </RelativeLayout>

@@ -16,10 +16,13 @@ public class Camera {
     public static final int RIGHT = 101;
     public static final int FORWARD = 102;
     public static final int BACKWARD = 103;
+    public static final int SCALE_BIG = 104;
+    public static final int SCALE_SMALL = 105;
 
     private static final float YAW = -90f;
     private static final float PITCH = 0.0f;
     private static final float SPEED = 5.0f;
+    private static final float SCALESPEED = 50.0f;
     private static final float SENSITIVTY = 0.1f;
     private static final float ZOOM = 45.0f;
 
@@ -31,6 +34,7 @@ public class Camera {
     private float yaw = YAW;
     private float pitch = PITCH;
     private float movementSpeed = SPEED;
+    private float scaleSpeed = SCALESPEED;
     private float touchSensitivity = SENSITIVTY;
     private float zoom = ZOOM;
     private float[] viewMatrix = new float[16];
@@ -93,9 +97,16 @@ public class Camera {
         updateCameraVectors();
     }
 
-    public void scale(float dzoom) {
+    public void scale(int direction, float deltaTime) {
+        float v = 0;
+        if (direction == SCALE_BIG) {
+            v = scaleSpeed * deltaTime;
+        } else if(direction==SCALE_SMALL){
+            v = -scaleSpeed * deltaTime;
+        }
+        zoom -= v;
         if (zoom > 1 && zoom < 45) {
-            zoom -= dzoom;
+            zoom -= v;
         } else if (zoom <= 1) {
             zoom = 1;
         } else if (zoom >= 45) {
@@ -109,7 +120,7 @@ public class Camera {
         aFront[1] = (float) Math.sin(VectorUtil.angleTransform(pitch));
         aFront[2] = (float) (Math.cos(VectorUtil.angleTransform(pitch)) * Math.sin(VectorUtil.angleTransform(yaw)));
         front = VectorUtil.normalize(aFront, 1);
-        LogUtil.i("啊啊啊"+front[0]+"   "+front[1]+"  "+front[2]);
+        LogUtil.i("啊啊啊" + front[0] + "   " + front[1] + "  " + front[2]);
         right = VectorUtil.normalize(VectorUtil.multiply(front, worldUp), 1);
         up = VectorUtil.normalize(VectorUtil.multiply(right, front), 1);
     }

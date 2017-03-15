@@ -133,6 +133,10 @@ public class MyGLSurfaceView extends GLSurfaceView implements ScaleGestureDetect
             mRenderFive.moveScreen(isPress, Camera.LEFT);
         } else if(v.getId()==R.id.right){
             mRenderFive.moveScreen(isPress,Camera.RIGHT);
+        } else if (v.getId() == R.id.up) {
+            mRenderFive.moveScreen(isPress,Camera.SCALE_BIG);
+        } else {
+            mRenderFive.moveScreen(isPress,Camera.SCALE_SMALL);
         }
     }
 }

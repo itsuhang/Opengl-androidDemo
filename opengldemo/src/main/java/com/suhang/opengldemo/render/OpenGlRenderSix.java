@@ -10,7 +10,6 @@ import com.suhang.opengldemo.R;
 import com.suhang.opengldemo.function.Camera;
 import com.suhang.opengldemo.utils.ShaderUtil;
 import com.suhang.opengldemo.utils.TextureUtil;
-import com.suhang.opengldemo.utils.VectorUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,7 +25,7 @@ import static android.opengl.GLES30.GL_DEPTH_BUFFER_BIT;
  * Created by 苏杭 on 2017/2/5 13:54.
  */
 
-public class OpenGlRenderFive implements GLSurfaceView.Renderer {
+public class OpenGlRenderSix implements GLSurfaceView.Renderer {
     public static final int VERTEX_COUNT = 3;
     public static final int FLOATBYTE = 4;
 
@@ -42,9 +41,9 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
     float lastTime = 0.0f;
     private float[][] mCube;
     private float[] mSkyboxVertices;
-    private Camera mCamera = new Camera(new float[]{0, 0, 5});
+    private Camera mCamera = new Camera(new float[]{0,0,5});
 
-    public OpenGlRenderFive(Context context) {
+    public OpenGlRenderSix(Context context) {
         mContext = context;
     }
 
@@ -153,7 +152,7 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
 
     private void bindData() {
         mSkyBuffer.position(0);
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, VERTEX_COUNT * FLOATBYTE, mSkyBuffer);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, VERTEX_COUNT*FLOATBYTE, mSkyBuffer);
         GLES30.glEnableVertexAttribArray(0);
 
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
@@ -176,13 +175,7 @@ public class OpenGlRenderFive implements GLSurfaceView.Renderer {
 
     private void bindMatrix() {
         if (isPress) {
-            if (direction == Camera.SCALE_BIG) {
-                mCamera.scale(direction,deltaTime);
-            } else if (direction == Camera.SCALE_SMALL) {
-                mCamera.scale(direction,deltaTime);
-            } else {
-                mCamera.moveCamera(direction, deltaTime);
-            }
+            mCamera.moveCamera(direction, deltaTime);
         }
         mCamera.bindMatrix(mView, mProjection);
         Matrix.setIdentityM(mModelMatrix, 0);
