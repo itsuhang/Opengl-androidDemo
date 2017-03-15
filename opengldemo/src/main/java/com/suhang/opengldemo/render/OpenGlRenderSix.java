@@ -37,6 +37,7 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
     private int mObjectModel;
     private int mObjectView;
     private int mObjectProjection;
+    private int mLightPos;
     private int mLightModel;
     private int mLightView;
     private int mLightProjection;
@@ -47,7 +48,7 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
     private Camera mCamera = new Camera(new float[]{0, 0, 5});
     private int mObjectColor;
     private int mLightColor;
-    private float[] lightPos = {1.2f, 1.0f, 1.5f};
+    private float[] lightPos = {1.2f, 1.0f, 2.0f};
 
     public OpenGlRenderSix(Context context) {
         mContext = context;
@@ -85,6 +86,9 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
         mObjectModel = GLES30.glGetUniformLocation(mObjectProgram, "model");
         mObjectView = GLES30.glGetUniformLocation(mObjectProgram, "view");
         mObjectProjection = GLES30.glGetUniformLocation(mObjectProgram, "projection");
+        mLightPos = GLES30.glGetUniformLocation(mObjectProgram, "lightPos");
+
+
         mLightModel = GLES30.glGetUniformLocation(mLightProgram, "model");
         mLightView = GLES30.glGetUniformLocation(mLightProgram, "view");
         mLightProjection = GLES30.glGetUniformLocation(mLightProgram, "projection");
@@ -98,47 +102,47 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
 
     private void createData() {
         mVertices = new float[]{
-                -0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                0.5f, 0.5f, -0.5f,
-                0.5f, 0.5f, -0.5f,
-                -0.5f, 0.5f, -0.5f,
-                -0.5f, -0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-                -0.5f, -0.5f, 0.5f,
-                0.5f, -0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
-                -0.5f, 0.5f, 0.5f,
-                -0.5f, -0.5f, 0.5f,
+                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+                0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+                0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+                0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-                -0.5f, 0.5f, 0.5f,
-                -0.5f, 0.5f, -0.5f,
-                -0.5f, -0.5f, -0.5f,
-                -0.5f, -0.5f, -0.5f,
-                -0.5f, -0.5f, 0.5f,
-                -0.5f, 0.5f, 0.5f,
+                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-                0.5f, 0.5f, 0.5f,
-                0.5f, 0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
+                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-                -0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, 0.5f,
-                0.5f, -0.5f, 0.5f,
-                -0.5f, -0.5f, 0.5f,
-                -0.5f, -0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-                -0.5f, 0.5f, -0.5f,
-                0.5f, 0.5f, -0.5f,
-                0.5f, 0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
-                -0.5f, 0.5f, 0.5f,
-                -0.5f, 0.5f, -0.5f
+                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+                0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
         };
 
         mVertexBuffer = ByteBuffer.allocateDirect(mVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -152,10 +156,13 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
 
     private void bindData() {
         mVertexBuffer.position(0);
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, VERTEX_COUNT * FLOATBYTE, mVertexBuffer);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, 6 * FLOATBYTE, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(0);
-
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, VERTEX_COUNT * FLOATBYTE, mVertexBuffer);
+        mVertexBuffer.position(3);
+        GLES30.glVertexAttribPointer(1, VERTEX_COUNT, GLES30.GL_FLOAT, false, 6 * FLOATBYTE, mVertexBuffer);
+        GLES30.glEnableVertexAttribArray(1);
+        mVertexBuffer.position(0);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, 6 * FLOATBYTE, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(0);
     }
 
@@ -176,6 +183,7 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
         GLES30.glUseProgram(mObjectProgram);
         GLES30.glUniform3f(mObjectColor, 1.0f, 0.5f, 0.31f);
         GLES30.glUniform3f(mLightColor, 1.0f, 1.0f, 1.0f);
+        GLES30.glUniform3f(mLightPos,lightPos[0],lightPos[1],lightPos[2]);
         mCamera.bindMatrix(mObjectView, mObjectProjection);
         Matrix.setIdentityM(mModelMatrix, 0);
         GLES30.glUniformMatrix4fv(mObjectModel, 1, false, mModelMatrix, 0);
