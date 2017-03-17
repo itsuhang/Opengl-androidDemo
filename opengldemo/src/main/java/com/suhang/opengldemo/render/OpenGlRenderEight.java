@@ -10,6 +10,7 @@ import com.suhang.opengldemo.R;
 import com.suhang.opengldemo.function.Camera;
 import com.suhang.opengldemo.interfaces.CanTranform;
 import com.suhang.opengldemo.utils.ShaderUtil;
+import com.suhang.opengldemo.utils.TextureUtil;
 import com.suhang.opengldemo.utils.VectorUtil;
 
 import java.nio.ByteBuffer;
@@ -19,6 +20,7 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static android.opengl.GLES20.GL_TEXTURE_2D;
 import static android.opengl.GLES30.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES30.GL_DEPTH_BUFFER_BIT;
 
@@ -26,11 +28,12 @@ import static android.opengl.GLES30.GL_DEPTH_BUFFER_BIT;
  * Created by 苏杭 on 2017/2/5 13:54.
  */
 
-public class OpenGlRenderSeven implements GLSurfaceView.Renderer, CanTranform {
+public class OpenGlRenderEight implements GLSurfaceView.Renderer, CanTranform {
     public static final int VERTEX_COUNT = 3;
     public static final int NORMAL_COUNT = 3;
+    public static final int TEXTURE_COUNT = 2;
     public static final int FLOATBYTE = 4;
-    public static final int GROUP_COUNT = VERTEX_COUNT + NORMAL_COUNT;
+    public static final int GROUP_COUNT = VERTEX_COUNT + NORMAL_COUNT+TEXTURE_COUNT;
     public static final int STRIED = GROUP_COUNT * FLOATBYTE;
 
     Context mContext;
@@ -41,7 +44,6 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer, CanTranform {
     private int mObjectView;
     private int mObjectProjection;
     private int mViewPos;
-    private int mObjectAmbient;
     private int mObjectDiffuse;
     private int mObjectSpecular;
     private int mObjectShininess;
@@ -59,8 +61,10 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer, CanTranform {
     private float[] mVertices;
     private Camera mCamera = new Camera(new float[]{1, 0, 7});
     private float[] mLightPos = {1.2f, 1.0f, 2f};
+    private int mTexture;
+    private int mTextureSpecular;
 
-    public OpenGlRenderSeven(Context context) {
+    public OpenGlRenderEight(Context context) {
         mContext = context;
     }
 
@@ -97,7 +101,6 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer, CanTranform {
         mObjectView = GLES30.glGetUniformLocation(mObjectProgram, "view");
         mObjectProjection = GLES30.glGetUniformLocation(mObjectProgram, "projection");
         mViewPos = GLES30.glGetUniformLocation(mObjectProgram, "viewPos");
-        mObjectAmbient = GLES30.glGetUniformLocation(mObjectProgram, "material.ambient");
         mObjectDiffuse = GLES30.glGetUniformLocation(mObjectProgram, "material.diffuse");
         mObjectSpecular = GLES30.glGetUniformLocation(mObjectProgram, "material.specular");
         mObjectShininess = GLES30.glGetUniformLocation(mObjectProgram, "material.shininess");
@@ -105,7 +108,6 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer, CanTranform {
         mLightDiffuse = GLES30.glGetUniformLocation(mObjectProgram, "light.diffuse");
         mLightSpecular = GLES30.glGetUniformLocation(mObjectProgram, "light.specular");
         mLightPosition = GLES30.glGetUniformLocation(mObjectProgram, "light.position");
-
 
 
         //光源的模型,观察,投影矩阵
@@ -119,60 +121,62 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer, CanTranform {
     private void createData() {
         mVertices = new float[]{
                 //后面
-                -0.5f, -0.5f, -0.5f, 0, 0, -1f,
-                0.5f, -0.5f, -0.5f, 0, 0, -1f,
-                0.5f, 0.5f, -0.5f, 0, 0, -1f,
-                0.5f, 0.5f, -0.5f, 0, 0, -1f,
-                -0.5f, 0.5f, -0.5f, 0, 0, -1f,
-                -0.5f, -0.5f, -0.5f, 0, 0, -1f,
+                -0.5f, -0.5f, -0.5f, 0, 0, -1f, 0, 0,
+                0.5f, -0.5f, -0.5f, 0, 0, -1f, 1, 0,
+                0.5f, 0.5f, -0.5f, 0, 0, -1f, 1, 1,
+                0.5f, 0.5f, -0.5f, 0, 0, -1f, 1, 1,
+                -0.5f, 0.5f, -0.5f, 0, 0, -1f, 0, 1,
+                -0.5f, -0.5f, -0.5f, 0, 0, -1f, 0, 0,
 
                 //前面
-                -0.5f, -0.5f, 0.5f, 0, 0, 1f,
-                0.5f, -0.5f, 0.5f, 0, 0, 1f,
-                0.5f, 0.5f, 0.5f, 0, 0, 1f,
-                0.5f, 0.5f, 0.5f, 0, 0, 1f,
-                -0.5f, 0.5f, 0.5f, 0, 0, 1f,
-                -0.5f, -0.5f, 0.5f, 0, 0, 1f,
+                -0.5f, -0.5f, 0.5f, 0, 0, 1f, 0.0f, 0.0f,
+                0.5f, -0.5f, 0.5f, 0, 0, 1f, 1.0f, 0.0f,
+                0.5f, 0.5f, 0.5f, 0, 0, 1f, 1.0f, 1.0f,
+                0.5f, 0.5f, 0.5f, 0, 0, 1f, 1.0f, 1.0f,
+                -0.5f, 0.5f, 0.5f, 0, 0, 1f, 0.0f, 1.0f,
+                -0.5f, -0.5f, 0.5f, 0, 0, 1f, 0.0f, 0.0f,
 
                 //左面
-                -0.5f, 0.5f, 0.5f, -1.0f, 0, 0,
-                -0.5f, 0.5f, -0.5f, -1.0f, 0, 0,
-                -0.5f, -0.5f, -0.5f, -1.0f, 0, 0,
-                -0.5f, -0.5f, -0.5f, -1.0f, 0, 0,
-                -0.5f, -0.5f, 0.5f, -1.0f, 0, 0,
-                -0.5f, 0.5f, 0.5f, -1.0f, 0, 0,
+                -0.5f, 0.5f, 0.5f, -1.0f, 0, 0, 1.0f, 0.0f,
+                -0.5f, 0.5f, -0.5f, -1.0f, 0, 0, 1.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f, -1.0f, 0, 0, 0.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f, -1.0f, 0, 0, 0.0f, 1.0f,
+                -0.5f, -0.5f, 0.5f, -1.0f, 0, 0, 0.0f, 0.0f,
+                -0.5f, 0.5f, 0.5f, -1.0f, 0, 0, 1.0f, 0.0f,
 
                 //右面
-                0.5f, 0.5f, 0.5f, 1.0f, 0, 0,
-                0.5f, 0.5f, -0.5f, 1.0f, 0, 0,
-                0.5f, -0.5f, -0.5f, 1.0f, 0, 0,
-                0.5f, -0.5f, -0.5f, 1.0f, 0, 0,
-                0.5f, -0.5f, 0.5f, 1.0f, 0, 0,
-                0.5f, 0.5f, 0.5f, 1.0f, 0, 0,
+                0.5f, 0.5f, 0.5f, 1.0f, 0, 0, 1.0f, 0.0f,
+                0.5f, 0.5f, -0.5f, 1.0f, 0, 0, 1.0f, 1.0f,
+                0.5f, -0.5f, -0.5f, 1.0f, 0, 0, 0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f, 1.0f, 0, 0, 0.0f, 1.0f,
+                0.5f, -0.5f, 0.5f, 1.0f, 0, 0, 0.0f, 0.0f,
+                0.5f, 0.5f, 0.5f, 1.0f, 0, 0, 1.0f, 0.0f,
 
                 //下面
-                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0,
-                0.5f, -0.5f, -0.5f, 0, -1.0f, 0,
-                0.5f, -0.5f, 0.5f, 0, -1.0f, 0,
-                0.5f, -0.5f, 0.5f, 0, -1.0f, 0,
-                -0.5f, -0.5f, 0.5f, 0, -1.0f, 0,
-                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0,
+                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 1.0f, 1.0f,
+                0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 1.0f, 1.0f,
+                0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 1.0f, 1.0f,
+                -0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 0.0f, 0.0f,
+                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 0.0f, 0.0f,
 
                 //上面
-                -0.5f, 0.5f, -0.5f, 0, 1.0f, 0,
-                0.5f, 0.5f, -0.5f, 0, 1.0f, 0,
-                0.5f, 0.5f, 0.5f, 0, 1.0f, 0,
-                0.5f, 0.5f, 0.5f, 0, 1.0f, 0,
-                -0.5f, 0.5f, 0.5f, 0, 1.0f, 0,
-                -0.5f, 0.5f, -0.5f, 0, 1.0f, 0,
+                -0.5f, 0.5f, -0.5f, 0, 1.0f, 0, 0.0f, 1.0f,
+                0.5f, 0.5f, -0.5f, 0, 1.0f, 0, 1.0f, 1.0f,
+                0.5f, 0.5f, 0.5f, 0, 1.0f, 0, 1.0f, 1.0f,
+                0.5f, 0.5f, 0.5f, 0, 1.0f, 0, 1.0f, 1.0f,
+                -0.5f, 0.5f, 0.5f, 0, 1.0f, 0, 0.0f, 0.0f,
+                -0.5f, 0.5f, -0.5f, 0, 1.0f, 0, 0.0f, 0.0f
         };
 
         mVertexBuffer = ByteBuffer.allocateDirect(mVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
         mVertexBuffer.put(mVertices);
+        mTexture = TextureUtil.loadTexture(mContext, R.mipmap.container2);
+        mTextureSpecular = TextureUtil.loadTexture(mContext, R.mipmap.container2_specular);
     }
 
     private void init() {
-        mObjectProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_seven, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_seven, GLES30.GL_FRAGMENT_SHADER));
+        mObjectProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_eight, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_eight, GLES30.GL_FRAGMENT_SHADER));
         mLightProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_seven_light, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_seven_light, GLES30.GL_FRAGMENT_SHADER));
     }
 
@@ -180,12 +184,24 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer, CanTranform {
         mVertexBuffer.position(0);
         GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(0);
-        mVertexBuffer.position(3);
-        GLES30.glVertexAttribPointer(1, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
+        mVertexBuffer.position(VERTEX_COUNT);
+        GLES30.glVertexAttribPointer(1, NORMAL_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(1);
+        mVertexBuffer.position(VERTEX_COUNT+NORMAL_COUNT);
+        GLES30.glVertexAttribPointer(2, TEXTURE_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
+        GLES30.glEnableVertexAttribArray(2);
+
         mVertexBuffer.position(0);
         GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(0);
+
+        GLES30.glUseProgram(mObjectProgram);
+        GLES30.glUniform1i(mObjectDiffuse, 0);
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
+        GLES30.glBindTexture(GL_TEXTURE_2D,mTexture);
+        GLES30.glUniform1i(mObjectSpecular,1);
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE1);
+        GLES30.glBindTexture(GL_TEXTURE_2D,mTextureSpecular);
     }
 
 
@@ -206,13 +222,11 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer, CanTranform {
             mCamera.moveCamera(direction, deltaTime);
         }
         GLES30.glUseProgram(mObjectProgram);
-        GLES30.glUniform3f(mObjectAmbient,1.0f,0.5f,0.31f);
-        GLES30.glUniform3f(mObjectDiffuse, 1.0f,0.5f,0.31f);
-        GLES30.glUniform3f(mObjectSpecular,0.5f, 0.5f, 0.5f);
-        GLES30.glUniform1f(mObjectShininess,32f);
-        GLES30.glUniform3f(mLightPosition,mLightPos[0],mLightPos[1],mLightPos[2]);
-        GLES30.glUniform3f(mViewPos,mCamera.position[0],mCamera.position[1],mCamera.position[2]);
-        GLES30.glUniform3f(mLightAmbient,0.2f, 0.2f, 0.2f);
+        GLES30.glUniform3f(mLightSpecular,0.5f,0.5f,0.5f);
+        GLES30.glUniform1f(mObjectShininess, 32f);
+        GLES30.glUniform3f(mLightPosition, mLightPos[0], mLightPos[1], mLightPos[2]);
+        GLES30.glUniform3f(mViewPos, mCamera.position[0], mCamera.position[1], mCamera.position[2]);
+        GLES30.glUniform3f(mLightAmbient, 0.2f, 0.2f, 0.2f);
         GLES30.glUniform3f(mLightDiffuse, 0.5f, 0.5f, 0.5f);
         GLES30.glUniform3f(mLightSpecular, 1.0f, 1.0f, 1.0f);
         mCamera.bindMatrix(mObjectView, mObjectProjection);

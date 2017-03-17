@@ -126,7 +126,6 @@ public class Camera {
         aFront[1] = (float) Math.sin(VectorUtil.angleTransform(pitch));
         aFront[2] = (float) (Math.cos(VectorUtil.angleTransform(pitch)) * Math.sin(VectorUtil.angleTransform(yaw)));
         front = VectorUtil.normalize(aFront, 1);
-        LogUtil.i("啊啊啊" + front[0] + "   " + front[1] + "  " + front[2]);
         right = VectorUtil.normalize(VectorUtil.multiply(front, worldUp), 1);
         up = VectorUtil.normalize(VectorUtil.multiply(right, front), 1);
     }

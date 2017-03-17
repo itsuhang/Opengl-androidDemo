@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.suhang.opengldemo.adapter.MainFragmentAdapter;
+import com.suhang.opengldemo.fragment.GLFragmentEight;
 import com.suhang.opengldemo.fragment.GLFragmentFive;
 import com.suhang.opengldemo.fragment.GLFragmentFour;
 import com.suhang.opengldemo.fragment.GLFragmentOne;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 		fragments.add(new GLFragmentFive());
 		fragments.add(new GLFragmentSix());
 		fragments.add(new GLFragmentSeven());
+		fragments.add(new GLFragmentEight());
 	}
 
 	private void init() {
