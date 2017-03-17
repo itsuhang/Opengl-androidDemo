@@ -27,28 +27,31 @@ import static android.opengl.GLES30.GL_DEPTH_BUFFER_BIT;
 
 public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
     public static final int VERTEX_COUNT = 3;
+    public static final int NORMAL_COUNT = 3;
     public static final int FLOATBYTE = 4;
+    public static final int GROUP_COUNT = VERTEX_COUNT + NORMAL_COUNT;
+    public static final int STRIED = GROUP_COUNT * FLOATBYTE;
 
     Context mContext;
     private int mObjectProgram;
     private int mLightProgram;
-    //    private int mTexture;
     private float[] mModelMatrix = new float[16];
     private int mObjectModel;
     private int mObjectView;
     private int mObjectProjection;
-    private int mLightPos;
+    private int mObjectColor;
+    private int mLightColor;
+    private int mLightPosi;
+    private int mViewPos;
+
     private int mLightModel;
     private int mLightView;
     private int mLightProjection;
-    //    private int mOutTexture;
-    float deltaTime = 0.0f;
-    float lastTime = 0.0f;
+    private float deltaTime = 0.0f;
+    private float lastTime = 0.0f;
     private float[] mVertices;
-    private Camera mCamera = new Camera(new float[]{0, 0, 5});
-    private int mObjectColor;
-    private int mLightColor;
-    private float[] lightPos = {1.2f, 1.0f, 2.0f};
+    private Camera mCamera = new Camera(new float[]{1, 0, 7});
+    private float[] mLightPos = {1.2f, 0.5f, 2f};
 
     public OpenGlRenderSix(Context context) {
         mContext = context;
@@ -82,67 +85,73 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
 
 
     private void getLocations() {
-//        mOutTexture = GLES30.glGetUniformLocation(mObjectProgram, "outTexture");
+        //物品的模型,观察,投影矩阵
         mObjectModel = GLES30.glGetUniformLocation(mObjectProgram, "model");
         mObjectView = GLES30.glGetUniformLocation(mObjectProgram, "view");
         mObjectProjection = GLES30.glGetUniformLocation(mObjectProgram, "projection");
-        mLightPos = GLES30.glGetUniformLocation(mObjectProgram, "lightPos");
+        mObjectColor = GLES30.glGetUniformLocation(mObjectProgram, "objectColor");
+        mLightColor = GLES30.glGetUniformLocation(mObjectProgram, "lightColor");
+        mLightPosi = GLES30.glGetUniformLocation(mObjectProgram, "lightPos");
+        mViewPos = GLES30.glGetUniformLocation(mObjectProgram, "viewPos");
 
 
+        //光源的模型,观察,投影矩阵
         mLightModel = GLES30.glGetUniformLocation(mLightProgram, "model");
         mLightView = GLES30.glGetUniformLocation(mLightProgram, "view");
         mLightProjection = GLES30.glGetUniformLocation(mLightProgram, "projection");
-
-
-        mObjectColor = GLES30.glGetUniformLocation(mObjectProgram, "objectColor");
-        mLightColor = GLES30.glGetUniformLocation(mObjectProgram, "lightColor");
     }
 
     private FloatBuffer mVertexBuffer;
 
     private void createData() {
         mVertices = new float[]{
-                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                //后面
+                -0.5f, -0.5f, -0.5f, 0, 0, -1f,
+                0.5f, -0.5f, -0.5f, 0, 0, -1f,
+                0.5f, 0.5f, -0.5f, 0, 0, -1f,
+                0.5f, 0.5f, -0.5f, 0, 0, -1f,
+                -0.5f, 0.5f, -0.5f, 0, 0, -1f,
+                -0.5f, -0.5f, -0.5f, 0, 0, -1f,
 
-                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-                0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-                0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-                0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+                //前面
+                -0.5f, -0.5f, 0.5f, 0, 0, 1f,
+                0.5f, -0.5f, 0.5f, 0, 0, 1f,
+                0.5f, 0.5f, 0.5f, 0, 0, 1f,
+                0.5f, 0.5f, 0.5f, 0, 0, 1f,
+                -0.5f, 0.5f, 0.5f, 0, 0, 1f,
+                -0.5f, -0.5f, 0.5f, 0, 0, 1f,
 
-                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-                -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-                -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                //左面
+                -0.5f, 0.5f, 0.5f, -1.0f, 0, 0,
+                -0.5f, 0.5f, -0.5f, -1.0f, 0, 0,
+                -0.5f, -0.5f, -0.5f, -1.0f, 0, 0,
+                -0.5f, -0.5f, -0.5f, -1.0f, 0, 0,
+                -0.5f, -0.5f, 0.5f, -1.0f, 0, 0,
+                -0.5f, 0.5f, 0.5f, -1.0f, 0, 0,
 
-                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-                0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-                0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                //右面
+                0.5f, 0.5f, 0.5f, 1.0f, 0, 0,
+                0.5f, 0.5f, -0.5f, 1.0f, 0, 0,
+                0.5f, -0.5f, -0.5f, 1.0f, 0, 0,
+                0.5f, -0.5f, -0.5f, 1.0f, 0, 0,
+                0.5f, -0.5f, 0.5f, 1.0f, 0, 0,
+                0.5f, 0.5f, 0.5f, 1.0f, 0, 0,
 
-                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-                0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-                -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                //下面
+                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0,
+                0.5f, -0.5f, -0.5f, 0, -1.0f, 0,
+                0.5f, -0.5f, 0.5f, 0, -1.0f, 0,
+                0.5f, -0.5f, 0.5f, 0, -1.0f, 0,
+                -0.5f, -0.5f, 0.5f, 0, -1.0f, 0,
+                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0,
 
-                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-                0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-                -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+                //上面
+                -0.5f, 0.5f, -0.5f, 0, 1.0f, 0,
+                0.5f, 0.5f, -0.5f, 0, 1.0f, 0,
+                0.5f, 0.5f, 0.5f, 0, 1.0f, 0,
+                0.5f, 0.5f, 0.5f, 0, 1.0f, 0,
+                -0.5f, 0.5f, 0.5f, 0, 1.0f, 0,
+                -0.5f, 0.5f, -0.5f, 0, 1.0f, 0,
         };
 
         mVertexBuffer = ByteBuffer.allocateDirect(mVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -156,13 +165,13 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
 
     private void bindData() {
         mVertexBuffer.position(0);
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, 6 * FLOATBYTE, mVertexBuffer);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(0);
         mVertexBuffer.position(3);
-        GLES30.glVertexAttribPointer(1, VERTEX_COUNT, GLES30.GL_FLOAT, false, 6 * FLOATBYTE, mVertexBuffer);
+        GLES30.glVertexAttribPointer(1, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(1);
         mVertexBuffer.position(0);
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, 6 * FLOATBYTE, mVertexBuffer);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(0);
     }
 
@@ -180,27 +189,27 @@ public class OpenGlRenderSix implements GLSurfaceView.Renderer, CanTranform {
 
 
     private void bindMatrix() {
-        GLES30.glUseProgram(mObjectProgram);
-        GLES30.glUniform3f(mObjectColor, 1.0f, 0.5f, 0.31f);
-        GLES30.glUniform3f(mLightColor, 1.0f, 1.0f, 1.0f);
-        GLES30.glUniform3f(mLightPos,lightPos[0],lightPos[1],lightPos[2]);
-        mCamera.bindMatrix(mObjectView, mObjectProjection);
-        Matrix.setIdentityM(mModelMatrix, 0);
-        GLES30.glUniformMatrix4fv(mObjectModel, 1, false, mModelMatrix, 0);
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36);
-
-
-
-        GLES30.glUseProgram(mLightProgram);
         if (isPress) {
             mCamera.moveCamera(direction, deltaTime);
         }
+        GLES30.glUseProgram(mObjectProgram);
+        GLES30.glUniform3f(mObjectColor, 1.0f, 0.5f, 0.31f);
+        GLES30.glUniform3f(mLightColor, 1.0f, 1.0f, 1.0f);
+        GLES30.glUniform3f(mLightPosi, mLightPos[0], mLightPos[1], mLightPos[2]);
+        GLES30.glUniform3f(mViewPos, mCamera.position[0], mCamera.position[1], mCamera.position[2]);
+        mCamera.bindMatrix(mObjectView, mObjectProjection);
+        Matrix.setIdentityM(mModelMatrix, 0);
+        GLES30.glUniformMatrix4fv(mObjectModel, 1, false, mModelMatrix, 0);
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, mVertices.length / GROUP_COUNT);
+
+        GLES30.glUseProgram(mLightProgram);
         mCamera.bindMatrix(mLightView, mLightProjection);
         Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, lightPos[0], lightPos[1], lightPos[2]);
-        Matrix.scaleM(mModelMatrix, 0, 0.4f, 0.4f, 0.4f);
+        Matrix.translateM(mModelMatrix, 0, mLightPos[0], mLightPos[1], mLightPos[2]);
+        Matrix.scaleM(mModelMatrix, 0, 0.2f, 0.2f, 0.2f);
         GLES30.glUniformMatrix4fv(mLightModel, 1, false, mModelMatrix, 0);
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36);
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, mVertices.length / GROUP_COUNT);
+
     }
 
     private float getCurrentTime() {

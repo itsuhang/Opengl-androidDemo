@@ -83,7 +83,7 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 		mIndicesData = ByteBuffer.allocateDirect(mIndices.length * 4).order(ByteOrder.nativeOrder()).asIntBuffer();
 		mIndicesData.put(mIndices);
 		mIndicesData.position(0);
-		mTexture = TextureUtil.loadTexture(mContext, R.mipmap.huanpeng);
+		mTexture = TextureUtil.loadTexture(mContext, R.mipmap.ic_launcher_round);
 	}
 
 	private void init() {

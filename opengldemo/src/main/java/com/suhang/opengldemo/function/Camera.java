@@ -26,7 +26,7 @@ public class Camera {
     private static final float SENSITIVTY = 0.1f;
     private static final float ZOOM = 45.0f;
 
-    private float[] position = new float[]{0, 0, 3};
+    public float[] position = new float[]{0, 0, 3};
     private float[] front = new float[]{0, 0, -1};
     private float[] worldUp = new float[]{0, 1, 0};
     private float[] up = new float[3];
@@ -50,6 +50,11 @@ public class Camera {
         this.position = position;
         updateCameraVectors();
     }
+    public Camera(float[] position,float[] front) {
+        this.position = position;
+        this.front = front;
+        updateCameraVectors();
+    }
 
     public Camera(float[] position, float[] up, float yaw, float pitch) {
         this.position = position;
@@ -58,6 +63,7 @@ public class Camera {
         this.pitch = pitch;
         updateCameraVectors();
     }
+
 
     public void moveCamera(int direction, float deltaTime) {
         float v = movementSpeed * deltaTime;

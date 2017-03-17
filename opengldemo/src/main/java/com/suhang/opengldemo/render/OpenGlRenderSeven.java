@@ -10,7 +10,7 @@ import com.suhang.opengldemo.R;
 import com.suhang.opengldemo.function.Camera;
 import com.suhang.opengldemo.interfaces.CanTranform;
 import com.suhang.opengldemo.utils.ShaderUtil;
-import com.suhang.opengldemo.utils.TextureUtil;
+import com.suhang.opengldemo.utils.VectorUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,23 +26,39 @@ import static android.opengl.GLES30.GL_DEPTH_BUFFER_BIT;
  * Created by 苏杭 on 2017/2/5 13:54.
  */
 
-public class OpenGlRenderSeven implements GLSurfaceView.Renderer  ,CanTranform {
+public class OpenGlRenderSeven implements GLSurfaceView.Renderer, CanTranform {
     public static final int VERTEX_COUNT = 3;
+    public static final int NORMAL_COUNT = 3;
     public static final int FLOATBYTE = 4;
+    public static final int GROUP_COUNT = VERTEX_COUNT + NORMAL_COUNT;
+    public static final int STRIED = GROUP_COUNT * FLOATBYTE;
 
     Context mContext;
-    private int mProgram;
-    private int mTexture;
+    private int mObjectProgram;
+    private int mLightProgram;
     private float[] mModelMatrix = new float[16];
-    private int mModel;
-    private int mView;
-    private int mProjection;
-    private int mOutTexture;
-    float deltaTime = 0.0f;
-    float lastTime = 0.0f;
-    private float[][] mCube;
-    private float[] mSkyboxVertices;
-    private Camera mCamera = new Camera(new float[]{0,0,5});
+    private int mObjectModel;
+    private int mObjectView;
+    private int mObjectProjection;
+    private int mViewPos;
+    private int mObjectAmbient;
+    private int mObjectDiffuse;
+    private int mObjectSpecular;
+    private int mObjectShininess;
+    private int mLightAmbient;
+    private int mLightDiffuse;
+    private int mLightSpecular;
+    private int mLightPosition;
+
+
+    private int mLightModel;
+    private int mLightView;
+    private int mLightProjection;
+    private float deltaTime = 0.0f;
+    private float lastTime = 0.0f;
+    private float[] mVertices;
+    private Camera mCamera = new Camera(new float[]{1, 0, 7});
+    private float[] mLightPos = {1.2f, 1.0f, 2f};
 
     public OpenGlRenderSeven(Context context) {
         mContext = context;
@@ -59,6 +75,7 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer  ,CanTranform {
     public Camera getCamera() {
         return mCamera;
     }
+
     @Override
     public float getDeltaTime() {
         return deltaTime;
@@ -75,91 +92,100 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer  ,CanTranform {
 
 
     private void getLocations() {
-        mOutTexture = GLES30.glGetUniformLocation(mProgram, "outTexture");
-        mModel = GLES30.glGetUniformLocation(mProgram, "model");
-        mView = GLES30.glGetUniformLocation(mProgram, "view");
-        mProjection = GLES30.glGetUniformLocation(mProgram, "projection");
+        //物品的模型,观察,投影矩阵
+        mObjectModel = GLES30.glGetUniformLocation(mObjectProgram, "model");
+        mObjectView = GLES30.glGetUniformLocation(mObjectProgram, "view");
+        mObjectProjection = GLES30.glGetUniformLocation(mObjectProgram, "projection");
+        mViewPos = GLES30.glGetUniformLocation(mObjectProgram, "viewPos");
+        mObjectAmbient = GLES30.glGetUniformLocation(mObjectProgram, "material.ambient");
+        mObjectDiffuse = GLES30.glGetUniformLocation(mObjectProgram, "material.diffuse");
+        mObjectSpecular = GLES30.glGetUniformLocation(mObjectProgram, "material.specular");
+        mObjectShininess = GLES30.glGetUniformLocation(mObjectProgram, "material.shininess");
+        mLightAmbient = GLES30.glGetUniformLocation(mObjectProgram, "light.ambient");
+        mLightDiffuse = GLES30.glGetUniformLocation(mObjectProgram, "light.diffuse");
+        mLightSpecular = GLES30.glGetUniformLocation(mObjectProgram, "light.specular");
+        mLightPosition = GLES30.glGetUniformLocation(mObjectProgram, "light.position");
+
+
+
+        //光源的模型,观察,投影矩阵
+        mLightModel = GLES30.glGetUniformLocation(mLightProgram, "model");
+        mLightView = GLES30.glGetUniformLocation(mLightProgram, "view");
+        mLightProjection = GLES30.glGetUniformLocation(mLightProgram, "projection");
     }
 
-    private FloatBuffer mSkyBuffer;
+    private FloatBuffer mVertexBuffer;
 
     private void createData() {
-        mSkyboxVertices = new float[]{
-                // Positions
-                -1.0f, 1.0f, -1.0f,
-                -1.0f, -1.0f, -1.0f,
-                1.0f, -1.0f, -1.0f,
-                1.0f, -1.0f, -1.0f,
-                1.0f, 1.0f, -1.0f,
-                -1.0f, 1.0f, -1.0f,
+        mVertices = new float[]{
+                //后面
+                -0.5f, -0.5f, -0.5f, 0, 0, -1f,
+                0.5f, -0.5f, -0.5f, 0, 0, -1f,
+                0.5f, 0.5f, -0.5f, 0, 0, -1f,
+                0.5f, 0.5f, -0.5f, 0, 0, -1f,
+                -0.5f, 0.5f, -0.5f, 0, 0, -1f,
+                -0.5f, -0.5f, -0.5f, 0, 0, -1f,
 
-                -1.0f, -1.0f, 1.0f,
-                -1.0f, -1.0f, -1.0f,
-                -1.0f, 1.0f, -1.0f,
-                -1.0f, 1.0f, -1.0f,
-                -1.0f, 1.0f, 1.0f,
-                -1.0f, -1.0f, 1.0f,
+                //前面
+                -0.5f, -0.5f, 0.5f, 0, 0, 1f,
+                0.5f, -0.5f, 0.5f, 0, 0, 1f,
+                0.5f, 0.5f, 0.5f, 0, 0, 1f,
+                0.5f, 0.5f, 0.5f, 0, 0, 1f,
+                -0.5f, 0.5f, 0.5f, 0, 0, 1f,
+                -0.5f, -0.5f, 0.5f, 0, 0, 1f,
 
-                1.0f, -1.0f, -1.0f,
-                1.0f, -1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, -1.0f,
-                1.0f, -1.0f, -1.0f,
+                //左面
+                -0.5f, 0.5f, 0.5f, -1.0f, 0, 0,
+                -0.5f, 0.5f, -0.5f, -1.0f, 0, 0,
+                -0.5f, -0.5f, -0.5f, -1.0f, 0, 0,
+                -0.5f, -0.5f, -0.5f, -1.0f, 0, 0,
+                -0.5f, -0.5f, 0.5f, -1.0f, 0, 0,
+                -0.5f, 0.5f, 0.5f, -1.0f, 0, 0,
 
-                -1.0f, -1.0f, 1.0f,
-                -1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 1.0f,
-                -1.0f, -1.0f, 1.0f,
+                //右面
+                0.5f, 0.5f, 0.5f, 1.0f, 0, 0,
+                0.5f, 0.5f, -0.5f, 1.0f, 0, 0,
+                0.5f, -0.5f, -0.5f, 1.0f, 0, 0,
+                0.5f, -0.5f, -0.5f, 1.0f, 0, 0,
+                0.5f, -0.5f, 0.5f, 1.0f, 0, 0,
+                0.5f, 0.5f, 0.5f, 1.0f, 0, 0,
 
-                -1.0f, 1.0f, -1.0f,
-                1.0f, 1.0f, -1.0f,
-                1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
-                -1.0f, 1.0f, 1.0f,
-                -1.0f, 1.0f, -1.0f,
+                //下面
+                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0,
+                0.5f, -0.5f, -0.5f, 0, -1.0f, 0,
+                0.5f, -0.5f, 0.5f, 0, -1.0f, 0,
+                0.5f, -0.5f, 0.5f, 0, -1.0f, 0,
+                -0.5f, -0.5f, 0.5f, 0, -1.0f, 0,
+                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0,
 
-                -1.0f, -1.0f, -1.0f,
-                -1.0f, -1.0f, 1.0f,
-                1.0f, -1.0f, -1.0f,
-                1.0f, -1.0f, -1.0f,
-                -1.0f, -1.0f, 1.0f,
-                1.0f, -1.0f, 1.0f
+                //上面
+                -0.5f, 0.5f, -0.5f, 0, 1.0f, 0,
+                0.5f, 0.5f, -0.5f, 0, 1.0f, 0,
+                0.5f, 0.5f, 0.5f, 0, 1.0f, 0,
+                0.5f, 0.5f, 0.5f, 0, 1.0f, 0,
+                -0.5f, 0.5f, 0.5f, 0, 1.0f, 0,
+                -0.5f, 0.5f, -0.5f, 0, 1.0f, 0,
         };
 
-
-        mCube = new float[][]{
-                {0.0f, 0.0f, 0.0f},
-                {2.0f, 3.0f, -6.0f},
-                {-1.5f, -2.2f, -1.5f},
-                {-1.8f, -2.0f, -4.3f},
-                {2.4f, -0.4f, -2.5f},
-                {-1.7f, 2.0f, -3.5f},
-                {1.3f, -1.0f, -2.5f},
-                {1.5f, 2.0f, -2.5f},
-                {1.5f, 0.2f, -1.5f},
-                {-1.3f, 1.0f, -1.5f}
-        };
-        mSkyBuffer = ByteBuffer.allocateDirect(mSkyboxVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mSkyBuffer.put(mSkyboxVertices);
-        mTexture = TextureUtil.loadTextureCube(mContext, new int[]{R.mipmap.box0, R.mipmap.box1, R.mipmap.box2, R.mipmap.box3, R.mipmap.box4, R.mipmap.box5});
+        mVertexBuffer = ByteBuffer.allocateDirect(mVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mVertexBuffer.put(mVertices);
     }
 
     private void init() {
-        mProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_five, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_five, GLES30.GL_FRAGMENT_SHADER));
-        GLES30.glUseProgram(mProgram);
+        mObjectProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_seven, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_seven, GLES30.GL_FRAGMENT_SHADER));
+        mLightProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_seven_light, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_seven_light, GLES30.GL_FRAGMENT_SHADER));
     }
 
     private void bindData() {
-        mSkyBuffer.position(0);
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, VERTEX_COUNT*FLOATBYTE, mSkyBuffer);
+        mVertexBuffer.position(0);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(0);
-
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_CUBE_MAP, mTexture);
-        GLES30.glUniform1i(mOutTexture, 0);
+        mVertexBuffer.position(3);
+        GLES30.glVertexAttribPointer(1, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
+        GLES30.glEnableVertexAttribArray(1);
+        mVertexBuffer.position(0);
+        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
+        GLES30.glEnableVertexAttribArray(0);
     }
 
 
@@ -179,16 +205,32 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer  ,CanTranform {
         if (isPress) {
             mCamera.moveCamera(direction, deltaTime);
         }
-        mCamera.bindMatrix(mView, mProjection);
+        GLES30.glUseProgram(mObjectProgram);
+        GLES30.glUniform3f(mObjectAmbient,1.0f,0.5f,0.31f);
+        GLES30.glUniform3f(mObjectDiffuse, 1.0f,0.5f,0.31f);
+        GLES30.glUniform3f(mObjectSpecular,0.5f, 0.5f, 0.5f);
+        GLES30.glUniform1f(mObjectShininess,32f);
+        GLES30.glUniform3f(mLightPosition,mLightPos[0],mLightPos[1],mLightPos[2]);
+        GLES30.glUniform3f(mViewPos,mCamera.position[0],mCamera.position[1],mCamera.position[2]);
+        float[] lightColor = {0.5f, 1.0f, 0.5f};
+        float[] a = VectorUtil.multiply(lightColor, new float[]{0.2f, 0.2f, 0.2f});
+        float[] b = VectorUtil.multiply(lightColor, new float[]{0.5f, 0.5f, 0.5f});
+        GLES30.glUniform3f(mLightAmbient,a[0], a[1], a[2]);
+        GLES30.glUniform3f(mLightDiffuse, b[0], b[1], b[2]);
+        GLES30.glUniform3f(mLightSpecular, 1.0f, 1.0f, 1.0f);
+        mCamera.bindMatrix(mObjectView, mObjectProjection);
         Matrix.setIdentityM(mModelMatrix, 0);
-        for (int i = 0; i < 10; i++) {
-            float[] cubes = mCube[i];
-            Matrix.translateM(mModelMatrix, 0, cubes[0], cubes[1], cubes[2]);
-            float angle = 20.0f * i;
-            Matrix.rotateM(mModelMatrix, 0, angle, 1.0f, 0.3f, 0.5f);
-            GLES30.glUniformMatrix4fv(mModel, 1, false, mModelMatrix, 0);
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36);
-        }
+        GLES30.glUniformMatrix4fv(mObjectModel, 1, false, mModelMatrix, 0);
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, mVertices.length / GROUP_COUNT);
+
+        GLES30.glUseProgram(mLightProgram);
+        mCamera.bindMatrix(mLightView, mLightProjection);
+        Matrix.setIdentityM(mModelMatrix, 0);
+        Matrix.translateM(mModelMatrix, 0, mLightPos[0], mLightPos[1], mLightPos[2]);
+        Matrix.scaleM(mModelMatrix, 0, 0.2f, 0.2f, 0.2f);
+        GLES30.glUniformMatrix4fv(mLightModel, 1, false, mModelMatrix, 0);
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, mVertices.length / GROUP_COUNT);
+
     }
 
     private float getCurrentTime() {
@@ -200,7 +242,7 @@ public class OpenGlRenderSeven implements GLSurfaceView.Renderer  ,CanTranform {
         float currentTime = getCurrentTime();
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
-        GLES30.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        GLES30.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // OpenGL docs.0
         bindMatrix();
     }
