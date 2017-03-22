@@ -75,7 +75,7 @@ public class OpenGlRenderThree implements GLSurfaceView.Renderer {
 		mIndicesData.put(mIndices);
 		mIndicesData.position(0);
 		mTexture = TextureUtil.loadTexture(mContext, R.mipmap.ic_launcher_round);
-		mTexture1 = TextureUtil.loadTexture(mContext, R.mipmap.huanpeng);
+		mTexture1 = TextureUtil.loadTexture(mContext, R.mipmap.box0);
 	}
 
 	private void init() {

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 public class MainFragmentAdapter extends FragmentStatePagerAdapter {
 	private ArrayList<Fragment> mFragments;
+	private String[] titles = {"矩形","着色","纹理","变换","摄像机","光照","材质","光照贴图"};
 
 	public MainFragmentAdapter(FragmentManager fm,ArrayList<Fragment> fragments) {
 		super(fm);
@@ -20,7 +21,7 @@ public class MainFragmentAdapter extends FragmentStatePagerAdapter {
 
 	@Override
 	public CharSequence getPageTitle(int position) {
-		return "PAGE_"+position;
+		return titles[position];
 	}
 
 	@Override

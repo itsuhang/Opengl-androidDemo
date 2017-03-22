@@ -24,7 +24,6 @@ public class TextureUtil {
             GLES30.glDeleteTextures(1, texture, 0);
             return 0;
         }
-//		GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, texture[0]);
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_REPEAT);    // Set texture wrapping to GL_REPEAT
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_REPEAT);
@@ -32,7 +31,6 @@ public class TextureUtil {
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
         GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0);
         GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0);
         bitmap.recycle();
         return texture[0];
     }
