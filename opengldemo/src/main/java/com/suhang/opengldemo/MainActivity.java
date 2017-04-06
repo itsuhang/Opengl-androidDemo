@@ -13,6 +13,7 @@ import com.suhang.opengldemo.adapter.MainFragmentAdapter;
 import com.suhang.opengldemo.fragment.GLFragmentEight;
 import com.suhang.opengldemo.fragment.GLFragmentFive;
 import com.suhang.opengldemo.fragment.GLFragmentFour;
+import com.suhang.opengldemo.fragment.GLFragmentNine;
 import com.suhang.opengldemo.fragment.GLFragmentOne;
 import com.suhang.opengldemo.fragment.GLFragmentSeven;
 import com.suhang.opengldemo.fragment.GLFragmentSix;
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void initData() {
+		mVp.setOffscreenPageLimit(0);
 		fragments.add(new GLFragmentOne());
 		fragments.add(new GLFragmentTwo());
 		fragments.add(new GLFragmentThree());
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
 		fragments.add(new GLFragmentSix());
 		fragments.add(new GLFragmentSeven());
 		fragments.add(new GLFragmentEight());
+		fragments.add(new GLFragmentNine());
 	}
 
 	private void init() {

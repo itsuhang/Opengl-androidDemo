@@ -11,7 +11,6 @@ import com.suhang.opengldemo.function.Camera;
 import com.suhang.opengldemo.interfaces.CanTranform;
 import com.suhang.opengldemo.utils.ShaderUtil;
 import com.suhang.opengldemo.utils.TextureUtil;
-import com.suhang.opengldemo.utils.VectorUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -28,17 +27,16 @@ import static android.opengl.GLES30.GL_DEPTH_BUFFER_BIT;
  * Created by 苏杭 on 2017/2/5 13:54.
  */
 
-public class OpenGlRenderEight implements GLSurfaceView.Renderer, CanTranform {
+public class OpenGlRenderNine implements GLSurfaceView.Renderer, CanTranform {
     public static final int VERTEX_COUNT = 3;
     public static final int NORMAL_COUNT = 3;
     public static final int TEXTURE_COUNT = 2;
     public static final int FLOATBYTE = 4;
-    public static final int GROUP_COUNT = VERTEX_COUNT + NORMAL_COUNT+TEXTURE_COUNT;
+    public static final int GROUP_COUNT = VERTEX_COUNT + NORMAL_COUNT + TEXTURE_COUNT;
     public static final int STRIED = GROUP_COUNT * FLOATBYTE;
 
     Context mContext;
     private int mObjectProgram;
-    private int mLightProgram;
     private float[] mModelMatrix = new float[16];
     private int mObjectModel;
     private int mObjectView;
@@ -50,21 +48,19 @@ public class OpenGlRenderEight implements GLSurfaceView.Renderer, CanTranform {
     private int mLightAmbient;
     private int mLightDiffuse;
     private int mLightSpecular;
-    private int mLightPosition;
-
-
-    private int mLightModel;
-    private int mLightView;
-    private int mLightProjection;
+    private int mLightDirection;
+    private int mLightConstant;
+    private int mLightLinear;
+    private int mLightQuadratic;
     private float deltaTime = 0.0f;
     private float lastTime = 0.0f;
     private float[] mVertices;
+    private float[][] mCube;
     private Camera mCamera = new Camera(new float[]{1, 0, 7});
-    private float[] mLightPos = {1.2f, 1.0f, 2f};
     private int mTexture;
     private int mTextureSpecular;
 
-    public OpenGlRenderEight(Context context) {
+    public OpenGlRenderNine(Context context) {
         mContext = context;
     }
 
@@ -107,13 +103,10 @@ public class OpenGlRenderEight implements GLSurfaceView.Renderer, CanTranform {
         mLightAmbient = GLES30.glGetUniformLocation(mObjectProgram, "light.ambient");
         mLightDiffuse = GLES30.glGetUniformLocation(mObjectProgram, "light.diffuse");
         mLightSpecular = GLES30.glGetUniformLocation(mObjectProgram, "light.specular");
-        mLightPosition = GLES30.glGetUniformLocation(mObjectProgram, "light.position");
-
-
-        //光源的模型,观察,投影矩阵
-        mLightModel = GLES30.glGetUniformLocation(mLightProgram, "model");
-        mLightView = GLES30.glGetUniformLocation(mLightProgram, "view");
-        mLightProjection = GLES30.glGetUniformLocation(mLightProgram, "projection");
+        mLightDirection = GLES30.glGetUniformLocation(mObjectProgram, "light.direction");
+        mLightConstant = GLES30.glGetUniformLocation(mObjectProgram, "light.constant");
+        mLightLinear = GLES30.glGetUniformLocation(mObjectProgram, "light.linear");
+        mLightQuadratic = GLES30.glGetUniformLocation(mObjectProgram, "light.quadratic");
     }
 
     private FloatBuffer mVertexBuffer;
@@ -156,9 +149,9 @@ public class OpenGlRenderEight implements GLSurfaceView.Renderer, CanTranform {
                 -0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 0.0f, 1.0f,
                 0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 1.0f, 1.0f,
                 0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 1.0f, 1.0f,
-                0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 1.0f, 1.0f,
+                0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 1.0f, 0f,
                 -0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 0.0f, 0.0f,
-                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 0.0f, 0.0f,
+                -0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 0.0f, 1f,
 
                 //上面
                 -0.5f, 0.5f, -0.5f, 0, 1.0f, 0, 0.0f, 1.0f,
@@ -169,6 +162,19 @@ public class OpenGlRenderEight implements GLSurfaceView.Renderer, CanTranform {
                 -0.5f, 0.5f, -0.5f, 0, 1.0f, 0, 0.0f, 1f
         };
 
+        mCube = new float[][]{
+                {1.0f, 2.5f, -7.5f},
+                {2.0f, 5.0f, -15.0f},
+                {-1.5f, -2.2f, -2.5f},
+                {-3.8f, -2.0f, -12.3f},
+                {2.4f, -0.4f, -3.5f},
+                {-1.7f, 3.0f, -7.5f},
+                {1.3f, -2.0f, -2.5f},
+                {1.5f, 2.0f, -2.5f},
+                {1.5f, 0.2f, -1.5f},
+                {-1.3f, 1.0f, -1.5f}
+        };
+
         mVertexBuffer = ByteBuffer.allocateDirect(mVertices.length * FLOATBYTE).order(ByteOrder.nativeOrder()).asFloatBuffer();
         mVertexBuffer.put(mVertices);
         mTexture = TextureUtil.loadTexture(mContext, R.mipmap.container2);
@@ -176,8 +182,7 @@ public class OpenGlRenderEight implements GLSurfaceView.Renderer, CanTranform {
     }
 
     private void init() {
-        mObjectProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_eight, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_eight, GLES30.GL_FRAGMENT_SHADER));
-        mLightProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_seven_light, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_seven_light, GLES30.GL_FRAGMENT_SHADER));
+        mObjectProgram = ShaderUtil.createProgram(ShaderUtil.createShader(mContext, R.raw.vertex_shader_nine, GLES30.GL_VERTEX_SHADER), ShaderUtil.createShader(mContext, R.raw.fragment_shader_nine, GLES30.GL_FRAGMENT_SHADER));
     }
 
     private void bindData() {
@@ -187,22 +192,18 @@ public class OpenGlRenderEight implements GLSurfaceView.Renderer, CanTranform {
         mVertexBuffer.position(VERTEX_COUNT);
         GLES30.glVertexAttribPointer(1, NORMAL_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(1);
-        mVertexBuffer.position(VERTEX_COUNT+NORMAL_COUNT);
+        mVertexBuffer.position(VERTEX_COUNT + NORMAL_COUNT);
         GLES30.glVertexAttribPointer(2, TEXTURE_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
         GLES30.glEnableVertexAttribArray(2);
-
-        mVertexBuffer.position(0);
-        GLES30.glVertexAttribPointer(0, VERTEX_COUNT, GLES30.GL_FLOAT, false, STRIED, mVertexBuffer);
-        GLES30.glEnableVertexAttribArray(0);
 
         GLES30.glUseProgram(mObjectProgram);
         //此处的0和	GLES30.GL_TEXTURE0中的0对应
         GLES30.glUniform1i(mObjectDiffuse, 0);
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-        GLES30.glBindTexture(GL_TEXTURE_2D,mTexture);
-        GLES30.glUniform1i(mObjectSpecular,1);
+        GLES30.glBindTexture(GL_TEXTURE_2D, mTexture);
+        GLES30.glUniform1i(mObjectSpecular, 1);
         GLES30.glActiveTexture(GLES30.GL_TEXTURE1);
-        GLES30.glBindTexture(GL_TEXTURE_2D,mTextureSpecular);
+        GLES30.glBindTexture(GL_TEXTURE_2D, mTextureSpecular);
     }
 
 
@@ -224,23 +225,25 @@ public class OpenGlRenderEight implements GLSurfaceView.Renderer, CanTranform {
         }
         GLES30.glUseProgram(mObjectProgram);
         GLES30.glUniform1f(mObjectShininess, 32f);
-        GLES30.glUniform3f(mLightPosition, mLightPos[0], mLightPos[1], mLightPos[2]);
+        GLES30.glUniform3f(mLightDirection, -0.2f, -1.0f, -0.3f);
+        GLES30.glUniform1f(mLightConstant, 1.0f);
+        GLES30.glUniform1f(mLightLinear, 0.09f);
+        GLES30.glUniform1f(mLightQuadratic, 0.032f);
         GLES30.glUniform3f(mViewPos, mCamera.position[0], mCamera.position[1], mCamera.position[2]);
         GLES30.glUniform3f(mLightAmbient, 0.2f, 0.2f, 0.2f);
         GLES30.glUniform3f(mLightDiffuse, 0.5f, 0.5f, 0.5f);
         GLES30.glUniform3f(mLightSpecular, 1.0f, 1.0f, 1.0f);
-        mCamera.bindMatrix(mObjectView, mObjectProjection);
-        Matrix.setIdentityM(mModelMatrix, 0);
-        GLES30.glUniformMatrix4fv(mObjectModel, 1, false, mModelMatrix, 0);
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, mVertices.length / GROUP_COUNT);
 
-        GLES30.glUseProgram(mLightProgram);
-        mCamera.bindMatrix(mLightView, mLightProjection);
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, mLightPos[0], mLightPos[1], mLightPos[2]);
-        Matrix.scaleM(mModelMatrix, 0, 0.2f, 0.2f, 0.2f);
-        GLES30.glUniformMatrix4fv(mLightModel, 1, false, mModelMatrix, 0);
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, mVertices.length / GROUP_COUNT);
+        for (int i = 0; i < 10; i++) {
+            Matrix.setIdentityM(mModelMatrix, 0);
+            mCamera.bindMatrix(mObjectView, mObjectProjection);
+            float cube[] = mCube[i];
+            Matrix.translateM(mModelMatrix, 0, cube[0], cube[1], cube[2]);
+            float angle = 20.0f * i;
+            Matrix.rotateM(mModelMatrix, 0, angle, 1.0f, 0.3f, 0.5f);
+            GLES30.glUniformMatrix4fv(mObjectModel, 1, false, mModelMatrix, 0);
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, mVertices.length / GROUP_COUNT);
+        }
 
     }
 

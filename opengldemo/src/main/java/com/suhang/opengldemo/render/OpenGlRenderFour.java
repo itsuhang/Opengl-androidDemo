@@ -119,6 +119,7 @@ public class OpenGlRenderFour implements GLSurfaceView.Renderer {
 
 		GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
 		GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTexture);
+		//此处的0和	GLES30.GL_TEXTURE0中的0对应
 		GLES30.glUniform1i(mOutTexture, 0);
 	}
 

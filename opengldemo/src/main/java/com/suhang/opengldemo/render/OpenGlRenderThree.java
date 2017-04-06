@@ -97,9 +97,11 @@ public class OpenGlRenderThree implements GLSurfaceView.Renderer {
 
 		GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
 		GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTexture);
+		//此处的0和	GLES30.GL_TEXTURE0中的0对应
 		GLES30.glUniform1i(GLES30.glGetUniformLocation(mProgram,"outTexture"),0);
 		GLES30.glActiveTexture(GLES30.GL_TEXTURE1);
 		GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTexture1);
+		//此处的1和	GLES30.GL_TEXTURE1中的1对应
 		GLES30.glUniform1i(GLES30.glGetUniformLocation(mProgram,"outTexture1"),1);
 
 	}

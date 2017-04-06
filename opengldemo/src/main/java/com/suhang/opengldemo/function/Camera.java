@@ -21,7 +21,7 @@ public class Camera {
 
     private static final float YAW = -90f;
     private static final float PITCH = 0.0f;
-    private static final float SPEED = 5.0f;
+    private static final float SPEED = 3.0f;
     private static final float SCALESPEED = 50.0f;
     private static final float SENSITIVTY = 0.1f;
     private static final float ZOOM = 45.0f;
@@ -41,6 +41,7 @@ public class Camera {
     private float[] projectionMatrix = new float[16];
     private int width;
     private int height;
+    private float realMoveSpeed;
 
     public Camera() {
         updateCameraVectors();
@@ -65,8 +66,18 @@ public class Camera {
     }
 
 
+    /**
+     * 左右旋转摄像机,因某些手机刷新三次有两次deltaTime结果为0,需要使用有效值(realMoveSpeed)代替此时的速度
+     * @param direction
+     * @param deltaTime
+     */
     public void moveCamera(int direction, float deltaTime) {
         float v = movementSpeed * deltaTime;
+        if (deltaTime != 0) {
+            realMoveSpeed = movementSpeed * deltaTime;
+        } else {
+            v = realMoveSpeed;
+        }
         if (direction == LEFT) {
             position = VectorUtil.add(position, VectorUtil.normalize(VectorUtil.multiply(VectorUtil.multiply(front, worldUp), v), v));
         } else if (direction == RIGHT) {
