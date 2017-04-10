@@ -148,7 +148,7 @@ public class OpenGlRenderNine implements GLSurfaceView.Renderer, CanTranform {
                 //下面
                 -0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 0.0f, 1.0f,
                 0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 1.0f, 1.0f,
-                0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 1.0f, 1.0f,
+                0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 1.0f, 0f,
                 0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 1.0f, 0f,
                 -0.5f, -0.5f, 0.5f, 0, -1.0f, 0, 0.0f, 0.0f,
                 -0.5f, -0.5f, -0.5f, 0, -1.0f, 0, 0.0f, 1f,

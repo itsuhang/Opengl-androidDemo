@@ -27,7 +27,7 @@ public class Camera {
     private static final float ZOOM = 45.0f;
 
     public float[] position = new float[]{0, 0, 3};
-    private float[] front = new float[]{0, 0, -1};
+    public float[] front = new float[]{0, 0, -1};
     private float[] worldUp = new float[]{0, 1, 0};
     private float[] up = new float[3];
     private float[] right = new float[3];
@@ -79,9 +79,9 @@ public class Camera {
             v = realMoveSpeed;
         }
         if (direction == LEFT) {
-            position = VectorUtil.add(position, VectorUtil.normalize(VectorUtil.multiply(VectorUtil.multiply(front, worldUp), v), v));
+            position = VectorUtil.add(position, VectorUtil.normalize(VectorUtil.multiply(VectorUtil.multiply(front, up), v), v));
         } else if (direction == RIGHT) {
-            position = VectorUtil.reduce(position, VectorUtil.normalize(VectorUtil.multiply(VectorUtil.multiply(front, worldUp), v), v));
+            position = VectorUtil.reduce(position, VectorUtil.normalize(VectorUtil.multiply(VectorUtil.multiply(front, up), v), v));
         } else if (direction == FORWARD) {
             position = VectorUtil.add(position, VectorUtil.multiply(front, v));
         } else if (direction == BACKWARD) {
@@ -95,7 +95,7 @@ public class Camera {
     }
 
     public void bindMatrix(int view, int projection) {
-        Matrix.setLookAtM(viewMatrix, 0, position[0], position[1], position[2], position[0] + front[0], position[1] + front[1], position[2] + front[2], worldUp[0], worldUp[1], worldUp[2]);
+        Matrix.setLookAtM(viewMatrix, 0, position[0], position[1], position[2], position[0] + front[0], position[1] + front[1], position[2] + front[2], up[0], up[1], up[2]);
         Matrix.perspectiveM(projectionMatrix, 0, zoom, 1.0f * width / height, 0.1f, 100.0f);
         GLES30.glUniformMatrix4fv(projection, 1, false, projectionMatrix, 0);
         GLES30.glUniformMatrix4fv(view, 1, false, viewMatrix, 0);

@@ -17,6 +17,7 @@ import com.suhang.opengldemo.fragment.GLFragmentNine;
 import com.suhang.opengldemo.fragment.GLFragmentOne;
 import com.suhang.opengldemo.fragment.GLFragmentSeven;
 import com.suhang.opengldemo.fragment.GLFragmentSix;
+import com.suhang.opengldemo.fragment.GLFragmentTen;
 import com.suhang.opengldemo.fragment.GLFragmentThree;
 import com.suhang.opengldemo.fragment.GLFragmentTwo;
 import com.suhang.opengldemo.utils.LogUtil;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 		fragments.add(new GLFragmentSeven());
 		fragments.add(new GLFragmentEight());
 		fragments.add(new GLFragmentNine());
+		fragments.add(new GLFragmentTen());
 	}
 
 	private void init() {
